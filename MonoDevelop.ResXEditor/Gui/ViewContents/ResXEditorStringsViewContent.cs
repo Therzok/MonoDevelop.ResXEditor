@@ -1,14 +1,18 @@
 ﻿using System;
+using System.Linq;
+
 namespace MonoDevelop.ResXEditor
 {
-	public class ResXEditorStringsViewContent : ResXEditorViewContent
+	class ResXEditorStringsViewContent : ResXEditorListViewContent
 	{
-		Gtk.HBox box;
 		public ResXEditorStringsViewContent(ResXData data) : base(data)
 		{
-			box = new Gtk.HBox();
-			box.Add(new Gtk.Label("Hello world"));
-			box.ShowAll();
+			treeView.ShowAll ();
+		}
+
+		protected override bool SkipNode(ResXNode node)
+		{
+			return !(node.Value is string);
 		}
 
 		public override string TabPageLabel
@@ -16,14 +20,6 @@ namespace MonoDevelop.ResXEditor
 			get
 			{
 				return "Strings";
-			}
-		}
-
-		public override Components.Control Control
-		{
-			get
-			{
-				return box;
 			}
 		}
 	}

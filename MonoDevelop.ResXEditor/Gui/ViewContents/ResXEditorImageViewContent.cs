@@ -1,7 +1,7 @@
 ﻿using System;
 namespace MonoDevelop.ResXEditor
 {
-	public class ResXEditorImageViewContent : ResXEditorViewContent
+	class ResXEditorImageViewContent : ResXEditorViewContent
 	{
 		Gtk.HBox box;
 		public ResXEditorImageViewContent(ResXData data) : base(data)

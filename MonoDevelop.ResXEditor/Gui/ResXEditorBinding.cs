@@ -1,15 +1,13 @@
 ﻿using System;
-using Mono.Addins;
-using MonoDevelop.Core;
-using MonoDevelop.Ide;
-using MonoDevelop.Ide.Gui;
-using MonoDevelop.Projects;
+using System.Collections.Generic;
 
 namespace MonoDevelop.ResXEditor
 {
-	public abstract class ResXEditorBinding 
+	public abstract class ResXEditorBinding
 	{
 		public abstract ResXEditorViewContent CreateViewContent(ResXData data);
+
+		public abstract IEnumerable<Type> TypesHandled { get; }
 	}
 
 	class ResXStringDisplayBinding : ResXEditorBinding
@@ -18,6 +16,14 @@ namespace MonoDevelop.ResXEditor
 		{
 			return new ResXEditorStringsViewContent(data);
 		}
+
+		public override IEnumerable<Type> TypesHandled
+		{
+			get
+			{
+				yield return typeof(string);
+			}
+		}
 	}
 
 	class ResXImageDisplayBinding : ResXEditorBinding
@@ -25,6 +31,30 @@ namespace MonoDevelop.ResXEditor
 		public override ResXEditorViewContent CreateViewContent(ResXData data)
 		{
 			return new ResXEditorImageViewContent(data);
+		}
+
+		public override IEnumerable<Type> TypesHandled
+		{
+			get
+			{
+				yield break;
+			}
+		}
+	}
+
+	class ResXOtherDisplayBinding : ResXEditorBinding
+	{
+		public override ResXEditorViewContent CreateViewContent(ResXData data)
+		{
+			return new ResXEditorOtherViewContent(data);
+		}
+
+		public override IEnumerable<Type> TypesHandled
+		{
+			get
+			{
+				yield break;
+			}
 		}
 	}
 }

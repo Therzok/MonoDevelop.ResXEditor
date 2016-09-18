@@ -8,12 +8,27 @@ namespace MonoDevelop.ResXEditor
 {
 	class DisplayBindingAttachmentHandler : CommandHandler
 	{
+		const string ResXEditorsExtensionPath = "/MonoDevelop/ResXEditor/ResXEditors";
 		protected override void Run()
 		{
 			Ide.IdeApp.Workbench.DocumentOpened += HandleDocumentOpened;
+
+			AddinManager.AddExtensionNodeHandler("/MonoDevelop/ResXEditor/ResXEditors", ExtensionNodesChanged);
 		}
 
-		const string ResXEditorsExtensionPath = "/MonoDevelop/ResXEditor/ResXEditors";
+		static void ExtensionNodesChanged(object sender, ExtensionNodeEventArgs args)
+		{
+			var binding = (ResXEditorBinding)args.ExtensionObject;
+			if (args.Change == ExtensionChange.Add)
+			{
+				ResXEditorKnownEditors.RegisterKnownTypes(binding.TypesHandled);
+			}
+			else
+			{
+				ResXEditorKnownEditors.UnregisterKnownTypes(binding.TypesHandled);
+			}
+		}
+
 		static void HandleDocumentOpened(object sender, DocumentEventArgs e)
 		{
 			var document = e.Document;
@@ -24,12 +39,12 @@ namespace MonoDevelop.ResXEditor
 				return;
 
 			// Load resx data.
-			var resx = new ResXData();
-
+			var resx = ResXData.FromFile(document.FileName);
 			int index = 0;
 			foreach (var editor in AddinManager.GetExtensionObjects<ResXEditorBinding>(ResXEditorsExtensionPath))
 			{
-				document.Window.InsertViewContent(index++, editor.CreateViewContent(resx));
+				var viewContent = editor.CreateViewContent(resx);
+				document.Window.InsertViewContent(index++, viewContent);
 			}
 		}
 	}

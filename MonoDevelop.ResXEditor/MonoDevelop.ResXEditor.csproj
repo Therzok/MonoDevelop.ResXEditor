@@ -34,6 +34,10 @@
     <Compile Include="Core\ResXData.cs" />
     <Compile Include="Gui\ViewContents\ResXEditorViewContent.cs" />
     <Compile Include="Gui\ViewContents\ResXEditorImageViewContent.cs" />
+    <Compile Include="Core\ResXNode.cs" />
+    <Compile Include="Gui\ViewContents\ResXEditorOtherViewContent.cs" />
+    <Compile Include="Gui\ResXEditorKnownEditors.cs" />
+    <Compile Include="Gui\ViewContents\ResXEditorListViewContent.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Manifest.addin.xml" />
@@ -45,6 +49,9 @@
     <Folder Include="Gui\" />
     <Folder Include="Core\" />
     <Folder Include="Gui\ViewContents\" />
+  </ItemGroup>
+  <ItemGroup>
+    <Reference Include="System.Windows.Forms" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\MonoDevelop.Addins.0.3.4\build\net40\MonoDevelop.Addins.targets" Condition="Exists('..\packages\MonoDevelop.Addins.0.3.4\build\net40\MonoDevelop.Addins.targets')" />

@@ -12,6 +12,9 @@
 		<Editor
 			id = "ResXStringEditor"
 			class = "MonoDevelop.ResXEditor.ResXImageDisplayBinding" />
+		<Editor
+			id = "ResXStringEditor"
+			class = "MonoDevelop.ResXEditor.ResXOtherDisplayBinding" />
 	</Extension>
 
 	<Extension path = "/MonoDevelop/Ide/StartupHandlers">
