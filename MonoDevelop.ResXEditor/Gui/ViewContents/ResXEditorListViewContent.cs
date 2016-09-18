@@ -117,7 +117,10 @@ namespace MonoDevelop.ResXEditor
 			var crt = (Gtk.CellRendererText)cell;
 			if (dataNode.Name == string.Empty)
 			{
-				crt.Text = "*";
+				if (dataNode.Comment != null || (string)dataNode.Value != string.Empty)
+					crt.Text = "!";
+				else
+					crt.Text = "*";
 			}
 			else
 			{
