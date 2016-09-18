@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<ExtensionModel>
+	<ExtensionPoint path = "/MonoDevelop/ResXEditor/ResXEditors" name = "ResX editor bindings">
+		<Description>Handler used to create the a resx editor view content which can display the current file.</Description>
+		<ExtensionNode name="Editor" objectType="MonoDevelop.ResXEditor.ResXEditorBinding" />
+	</ExtensionPoint>
+	
+	<Extension path = "/MonoDevelop/ResXEditor/ResXEditors">
+		<Editor
+			id = "ResXStringEditor"
+			class = "MonoDevelop.ResXEditor.ResXStringDisplayBinding" />
+		<Editor
+			id = "ResXStringEditor"
+			class = "MonoDevelop.ResXEditor.ResXImageDisplayBinding" />
+	</Extension>
+
+	<Extension path = "/MonoDevelop/Ide/StartupHandlers">
+		<Class class = "MonoDevelop.ResXEditor.DisplayBindingAttachmentHandler"/>
+	</Extension>
+</ExtensionModel>
