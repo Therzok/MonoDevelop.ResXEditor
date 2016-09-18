@@ -15,6 +15,11 @@ namespace MonoDevelop.ResXEditor
 			return !(node.Value is string);
 		}
 
+		protected override ResXNode GetPlaceholder()
+		{
+			return new ResXNode(string.Empty, string.Empty, null, null);
+		}
+
 		public override string TabPageLabel
 		{
 			get

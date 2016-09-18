@@ -25,9 +25,8 @@ namespace MonoDevelop.ResXEditor
 				foreach (var item in Nodes)
 					writer.AddResource(item);
 
-				// FIXME:
-				//foreach (var item in Metadata)
-				//	writer.AddMetadata()
+				foreach (var item in Metadata)
+					writer.AddMetadata(item.Name, item.Value);
 
 				writer.Generate();
 			}
@@ -51,6 +50,7 @@ namespace MonoDevelop.ResXEditor
 			return new ResXData (path)
 			{
 				Nodes = nodes,
+				Metadata = metadata,
 			};
 		}
 	}

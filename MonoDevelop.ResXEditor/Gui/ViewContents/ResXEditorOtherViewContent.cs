@@ -18,7 +18,7 @@ namespace MonoDevelop.ResXEditor
 		protected override void AddTreeViewColumns()
 		{
 			base.AddTreeViewColumns();
-			treeView.AppendColumn("Type", new Gtk.CellRendererText(), new Gtk.TreeCellDataFunc(TypeDataFunc));
+			treeView.AppendColumn("Type", crt, new Gtk.TreeCellDataFunc(TypeDataFunc));
 		}
 
 		static void TypeDataFunc(Gtk.CellLayout cell_layout, Gtk.CellRenderer cell, Gtk.TreeModel tree_model, Gtk.TreeIter iter)
