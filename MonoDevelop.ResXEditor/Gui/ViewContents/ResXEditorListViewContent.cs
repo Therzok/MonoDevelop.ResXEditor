@@ -108,6 +108,7 @@ namespace MonoDevelop.ResXEditor
 			}
 
 			// TODO: Maybe only do it on user save?
+			treeView.ColumnsAutosize();
 			Data.WriteToFile();
 		}
 
@@ -152,12 +153,9 @@ namespace MonoDevelop.ResXEditor
 			crt.Text = dataNode.Comment;
 		}
 
-		public override Components.Control Control
+		protected override Components.Control CreateContent()
 		{
-			get
-			{
-				return treeView;
-			}
+			return treeView;
 		}
 	}
 }

@@ -19,12 +19,9 @@ namespace MonoDevelop.ResXEditor
 			}
 		}
 
-		public override Components.Control Control
+		protected override Components.Control CreateContent()
 		{
-			get
-			{
-				return box;
-			}
+			return box;
 		}
 	}
 }
