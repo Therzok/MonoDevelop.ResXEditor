@@ -9,9 +9,11 @@
 		<Editor
 			id = "ResXStringEditor"
 			class = "MonoDevelop.ResXEditor.ResXStringDisplayBinding" />
+		<!--
 		<Editor
 			id = "ResXStringEditor"
 			class = "MonoDevelop.ResXEditor.ResXImageDisplayBinding" />
+		-->
 		<Editor
 			id = "ResXStringEditor"
 			class = "MonoDevelop.ResXEditor.ResXOtherDisplayBinding" />
