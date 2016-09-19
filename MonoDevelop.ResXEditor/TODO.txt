@@ -1,5 +1,6 @@
 ﻿UI:
 * Use Xwt?
+* Localize addin via resx
 
 Functionality:
 * Add support for images, ico files, audio files, text files - XFileRef
@@ -12,6 +13,7 @@ UX:
 * Add resource from file
 * Fancy display name for type
 * Multiple display kinds - tree, grid
+* Keybindings + commands
 
 ListViewContent:
 * Multi-selection support

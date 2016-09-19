@@ -56,7 +56,7 @@ namespace MonoDevelop.ResXEditor
 			
 			args.RetVal = true;
 			var menu = new ContextMenu();
-			var mi = new ContextMenuItem("Remove");
+			var mi = new ContextMenuItem("Remove Row");
 			mi.Context = selection;
 			mi.Clicked += OnPopupMenuActivated;
 			menu.Add(mi);
