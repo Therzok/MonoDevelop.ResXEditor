@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using MonoDevelop.Components;
 
 namespace MonoDevelop.ResXEditor
 {
 	public abstract class ResXEditorListViewContent : ResXEditorViewContent
 	{
+		const string ResXDataKey = "source";
 		protected readonly Gtk.ListStore store;
 		protected readonly Gtk.TreeView treeView;
 
@@ -15,12 +17,14 @@ namespace MonoDevelop.ResXEditor
 		protected ResXEditorListViewContent(ResXData data) : base(data)
 		{
 			store = new Gtk.ListStore(typeof(ResXNode));
+			store.Data[ResXDataKey] = data;
 			treeView = new Gtk.TreeView(store)
 			{
 				EnableGridLines = Gtk.TreeViewGridLines.Both,
 			};
 			crt = new Gtk.CellRendererText();
 
+			treeView.ButtonPressEvent += OnTreeViewButtonPress;
 			foreach (var node in data.Nodes)
 			{
 				names.Add(node.Name);
@@ -33,6 +37,60 @@ namespace MonoDevelop.ResXEditor
 			AddPlaceholder();
 
 			AddTreeViewColumns();
+		}
+
+		[GLib.ConnectBefore]
+		static void OnTreeViewButtonPress(object o, Gtk.ButtonPressEventArgs args)
+		{
+			args.RetVal = false;
+			if (args.Event.Type != Gdk.EventType.ButtonPress || args.Event.Button != 3)
+				return;
+
+			var treeView = (Gtk.TreeView)o;
+			var selection = treeView.Selection;
+			Gtk.TreePath path;
+			if (treeView.GetPathAtPos((int)args.Event.X, (int)args.Event.Y, out path))
+				selection.SelectPath(path);
+			else
+				return;
+			
+			args.RetVal = true;
+			var menu = new ContextMenu();
+			var mi = new ContextMenuItem("Remove");
+			mi.Context = selection;
+			mi.Clicked += OnPopupMenuActivated;
+			menu.Add(mi);
+
+			// FIXME: Coordinates
+			menu.Show(treeView, (int)args.Event.X, (int)args.Event.Y);
+		}
+
+		static void OnPopupMenuActivated(object o, ContextMenuItemClickedEventArgs args)
+		{
+			var selection = (Gtk.TreeSelection)args.Context;
+			var model = (Gtk.ListStore)selection.TreeView.Model;
+			var data = (ResXData)model.Data[ResXDataKey];
+
+			foreach (var path in selection.GetSelectedRows())
+			{
+				Gtk.TreeIter iter;
+				if (!model.GetIter(out iter, path))
+					continue;
+
+				var node = (ResXNode)model.GetValue(iter, 0);
+				if (node.Name == string.Empty)
+				{
+					node.Value = string.Empty;
+					node.Comment = null;
+					continue;
+				}
+
+				if (!model.Remove(ref iter))
+					continue;
+
+				data.Nodes.Remove(node);
+			}
+			data.WriteToFile();
 		}
 
 		void AddPlaceholder()
@@ -156,6 +214,12 @@ namespace MonoDevelop.ResXEditor
 		protected override Components.Control CreateContent()
 		{
 			return treeView;
+		}
+
+		public override void Dispose()
+		{
+			store.Data[ResXDataKey] = null;
+			base.Dispose();
 		}
 	}
 }
