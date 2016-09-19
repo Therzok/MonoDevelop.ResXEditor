@@ -1,0 +1,7 @@
+<AddinProject appVersion="6.0">
+  <Project platforms="Win32 Mac Linux">
+    <AddinFile>MonoDevelop.ResXEditor/bin/Debug/MonoDevelop.ResXEditor.dll</AddinFile>
+    <BuildFile>MonoDevelop.ResXEditor.sln</BuildFile>
+    <BuildConfiguration>Debug</BuildConfiguration>
+  </Project>
+</AddinProject>
