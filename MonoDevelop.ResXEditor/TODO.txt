@@ -1,4 +1,4 @@
-﻿Add support for images.
+﻿Add support for images, ico files, text files - XFileRef
 Add support for localization (fast switcher at the top)
 Add some top toolbar for actions
 Add file reload when modifying source
