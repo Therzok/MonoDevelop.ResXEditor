@@ -1,11 +1,17 @@
-﻿Add support for images, ico files, audio files, text files - XFileRef
-Add support for localization (fast switcher at the top)
-Add some top toolbar for actions
-Add file reload when modifying source
-Implement integration with property pad
-Add resource from file
-Fancy display name for type
-Multiple display kinds - tree, grid
+﻿UI:
+* Use Xwt?
+
+Functionality:
+* Add support for images, ico files, audio files, text files - XFileRef
+* Add file reload when modifying source
+* Implement integration with property pad
+
+UX:
+* Add support for localization (fast switcher at the top)
+* Add some top toolbar for actions
+* Add resource from file
+* Fancy display name for type
+* Multiple display kinds - tree, grid
 
 ListViewContent:
 * Multi-selection support
