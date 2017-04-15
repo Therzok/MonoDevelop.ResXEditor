@@ -43,7 +43,7 @@ namespace MonoDevelop.ResXEditor
 				var enumerator = reader.GetMetadataEnumerator();
 				while (enumerator.MoveNext())
 				{
-					metadata.Add((ResXNode)(ResXDataNode)enumerator.Value);
+					metadata.Add((ResXDataNode)enumerator.Value);
 				}
 			}
 

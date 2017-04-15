@@ -11,7 +11,7 @@ namespace MonoDevelop.ResXEditor
 		const string ResXEditorsExtensionPath = "/MonoDevelop/ResXEditor/ResXEditors";
 		protected override void Run()
 		{
-			Ide.IdeApp.Workbench.DocumentOpened += HandleDocumentOpened;
+            IdeApp.Workbench.DocumentOpened += HandleDocumentOpened;
 
 			AddinManager.AddExtensionNodeHandler("/MonoDevelop/ResXEditor/ResXEditors", ExtensionNodesChanged);
 		}

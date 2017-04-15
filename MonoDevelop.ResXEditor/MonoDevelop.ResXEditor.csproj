@@ -31,14 +31,15 @@
     <Compile Include="Properties\AddinInfo.cs" />
     <Compile Include="Gui\ResXEditorBinding.cs" />
     <Compile Include="Gui\DisplayBindingAttachmentHandler.cs" />
-    <Compile Include="Gui\ViewContents\ResXEditorStringsViewContent.cs" />
     <Compile Include="Core\ResXData.cs" />
     <Compile Include="Gui\ViewContents\ResXEditorViewContent.cs" />
-    <Compile Include="Gui\ViewContents\ResXEditorImageViewContent.cs" />
     <Compile Include="Core\ResXNode.cs" />
-    <Compile Include="Gui\ViewContents\ResXEditorOtherViewContent.cs" />
     <Compile Include="Gui\ResXEditorKnownEditors.cs" />
     <Compile Include="Gui\ViewContents\ResXEditorListViewContent.cs" />
+    <Compile Include="Gui\ViewContents.Impl\ResXEditorStringsViewContent.cs" />
+    <Compile Include="Gui\ViewContents.Impl\ResXEditorOtherViewContent.cs" />
+    <Compile Include="Gui\ViewContents.Impl\ResXEditorImageViewContent.cs" />
+    <Compile Include="Gui\ViewContents\ResXEditorGridViewContent.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Manifest.addin.xml" />
@@ -50,6 +51,7 @@
     <Folder Include="Gui\" />
     <Folder Include="Core\" />
     <Folder Include="Gui\ViewContents\" />
+    <Folder Include="Gui\ViewContents.Impl\" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System.Windows.Forms" />
