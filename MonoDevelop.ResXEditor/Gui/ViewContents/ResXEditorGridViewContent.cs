@@ -1,9 +1,11 @@
 ﻿using System;
-namespace MonoDevelop.ResXEditor.Gui.ViewContents
+using MonoDevelop.Components;
+
+namespace MonoDevelop.ResXEditor
 {
-    public class ResXEditorGridViewContent : ResXEditorViewContent
+    public abstract class ResXEditorGridViewContent : ResXEditorViewContent
     {
-        public ResXEditorGridViewContent()
+        protected ResXEditorGridViewContent(ResXData data) : base(data)
         {
         }
     }

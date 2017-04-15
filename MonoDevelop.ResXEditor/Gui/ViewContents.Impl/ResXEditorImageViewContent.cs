@@ -1,13 +1,13 @@
 ﻿using System;
 namespace MonoDevelop.ResXEditor
 {
-	class ResXEditorImageViewContent : ResXEditorViewContent
+	class ResXEditorImageViewContent : ResXEditorGridViewContent
 	{
 		Gtk.HBox box;
 		public ResXEditorImageViewContent(ResXData data) : base(data)
 		{
 			box = new Gtk.HBox();
-			box.Add(new Gtk.Label("Hello world"));
+            box.Add(new Gtk.Label("Hello world"));
 			box.ShowAll();
 		}
 
