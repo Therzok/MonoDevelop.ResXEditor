@@ -11,15 +11,11 @@ namespace MonoDevelop.ResXEditor
         {
         }
 
-        public ResXData Data
-        {
-            get;
-            private set;
-        }
+        protected ResXData Data { get; private set; }
 
         internal ResXEditorViewContent Initialize(ResXData data)
 		{
-			Data = data;
+            Data = data;
             OnInitialize(data);
             return this;
         }

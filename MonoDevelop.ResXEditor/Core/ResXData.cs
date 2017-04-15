@@ -11,27 +11,27 @@ namespace MonoDevelop.ResXEditor
     {
         public IList<ResXNode> Nodes { get; private set; }
         public IList<ResXNode> Metadata { get; private set; }
-
         public string Path { get; }
-		ResXData(string path) => Path = path;
 
-		public T GetValue<T>(ResXNode node)
+        ResXData(string path) => Path = path;
+
+        public T GetValue<T>(ResXNode node)
 		{
-            return (T)GetValue(node);
+			return (T)GetValue(node);
 		}
 
-        public object GetValue(ResXNode node)
-        {
-            var fileRef = node.ObjectValue as ResXFileRef;
-            if (fileRef != null)
-            {
-                var absolutePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName (Path), fileRef.FileName);
-                var absoluteRef = new ResXFileRef(absolutePath, fileRef.TypeName, fileRef.TextFileEncoding);
-                var newNode = new ResXDataNode(node.Name, absoluteRef).GetValue(Constants.DefaultResolutionService);
-                return newNode;
-             }
-            return node.ObjectValue;
-        }
+		public object GetValue(ResXNode node)
+		{
+			var fileRef = node.ObjectValue as ResXFileRef;
+			if (fileRef != null)
+			{
+				var absolutePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Path), fileRef.FileName);
+				var absoluteRef = new ResXFileRef(absolutePath, fileRef.TypeName, fileRef.TextFileEncoding);
+				var newNode = new ResXDataNode(node.Name, absoluteRef).GetValue(Constants.DefaultResolutionService);
+				return newNode;
+			}
+			return node.ObjectValue;
+		}
 
         /*public object SetValue(ResXNode node)
         {
@@ -41,11 +41,11 @@ namespace MonoDevelop.ResXEditor
             objValue = value;
         }*/
 
-        public void WriteToFile()
+        public void WriteToFile(IEnumerable<ResXNode> nodes)
         {
             using (var writer = new ResXResourceWriter(Path))
             {
-                foreach (var item in Nodes)
+                foreach (var item in nodes)
                     writer.AddResource(item);
 
                 foreach (var item in Metadata)

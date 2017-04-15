@@ -40,7 +40,7 @@ namespace MonoDevelop.ResXEditor.Tests
 
                 resxdata.Nodes.Add(new ResXNode("string", "test", "", "System.String"));
 
-                resxdata.WriteToFile();
+                resxdata.WriteToFile(resxdata.Nodes);
 
                 resxdata = ResXData.FromFile(workFile);
                 Assert.AreEqual(3, resxdata.Nodes.Count);
