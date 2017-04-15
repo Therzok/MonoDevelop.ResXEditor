@@ -44,7 +44,6 @@
     <EmbeddedResource Include="Properties\Manifest.addin.xml" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="TODO.txt" />
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
