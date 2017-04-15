@@ -12,6 +12,7 @@ namespace MonoDevelop.ResXEditor
         }
 
         protected ResXData Data { get; private set; }
+        protected DocumentToolbar Toolbar { get; private set; }
 
         internal ResXEditorViewContent Initialize(ResXData data)
 		{
@@ -21,6 +22,17 @@ namespace MonoDevelop.ResXEditor
         }
 
         protected abstract void OnInitialize(ResXData data);
+
+        protected override void OnWorkbenchWindowChanged()
+        {
+            base.OnWorkbenchWindowChanged();
+
+            if (WorkbenchWindow != null)
+            {
+                Toolbar = WorkbenchWindow.GetToolbar(this);
+            }
+        }
+
         protected abstract Xwt.Widget CreateContent();
 
 		public override sealed Control Control
@@ -30,7 +42,7 @@ namespace MonoDevelop.ResXEditor
 				if (sw == null)
 				{
 					sw = new CompactScrolledWindow();
-                    sw.Add(CreateContent().ToGtkWidget());
+                    sw.AddWithViewport(CreateContent().ToGtkWidget());
 					sw.ShowAll();
 				}
 				return sw;

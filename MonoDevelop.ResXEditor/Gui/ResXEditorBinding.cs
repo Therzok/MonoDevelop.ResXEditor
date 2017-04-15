@@ -32,7 +32,8 @@ namespace MonoDevelop.ResXEditor
 			get
 			{
                 yield return typeof(System.Drawing.Bitmap);
-                yield return typeof(System.Drawing.Icon);
+				yield return typeof(System.Drawing.Icon);
+                yield return typeof(System.Drawing.Image);
 			}
 		}
 	}

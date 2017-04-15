@@ -5,7 +5,7 @@ using Mono.Addins.Description;
 [assembly: Addin(
 	"MonoDevelop.ResXEditor",
 	Namespace = "MonoDevelop.ResXEditor",
-	Version = "0.1"
+    Version = "0.0599"
 )]
 
 [assembly: AddinName("MonoDevelop.ResXEditor")]

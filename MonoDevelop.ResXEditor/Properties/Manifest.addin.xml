@@ -9,17 +9,15 @@
 		<Editor
 			id = "ResXStringEditor"
 			class = "MonoDevelop.ResXEditor.ResXStringDisplayBinding" />
-		<!--
 		<Editor
 			id = "ResXImageEditor"
 			class = "MonoDevelop.ResXEditor.ResXImageDisplayBinding" />
-		-->
 		<Editor
 			id = "ResXOtherEditor"
 			class = "MonoDevelop.ResXEditor.ResXOtherDisplayBinding" />
 	</Extension>
 
-	<Extension path = "/MonoDevelop/Ide/StartupHandlers">
+	<Extension path = "/MonoDevelop/Ide/InitCompleteHandlers">
 		<Class class = "MonoDevelop.ResXEditor.DisplayBindingAttachmentHandler"/>
 	</Extension>
 </ExtensionModel>

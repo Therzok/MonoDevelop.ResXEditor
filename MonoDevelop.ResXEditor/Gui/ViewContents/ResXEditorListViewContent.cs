@@ -10,15 +10,15 @@ namespace MonoDevelop.ResXEditor
         Xwt.ListStore store;
         Xwt.ListView listView;
 
-        HashSet<string> names = new HashSet<string>();
-        Xwt.DataField<string> countField = new Xwt.DataField<string>();
-        Xwt.DataField<string> nameField = new Xwt.DataField<string>();
-        Xwt.DataField<string> valueField = new Xwt.DataField<string>();
-        Xwt.DataField<string> commentField = new Xwt.DataField<string>();
-        Xwt.DataField<string> typeField = new Xwt.DataField<string>();
-        Xwt.DataField<ResXNode> nodeField = new Xwt.DataField<ResXNode>();
+        readonly HashSet<string> names = new HashSet<string>();
+        protected readonly Xwt.DataField<string> countField = new Xwt.DataField<string>();
+        protected readonly Xwt.DataField<string> nameField = new Xwt.DataField<string>();
+        protected readonly Xwt.DataField<string> valueField = new Xwt.DataField<string>();
+        protected readonly Xwt.DataField<string> commentField = new Xwt.DataField<string>();
+        protected readonly Xwt.DataField<string> typeField = new Xwt.DataField<string>();
+        protected readonly Xwt.DataField<ResXNode> nodeField = new Xwt.DataField<ResXNode>();
 
-        protected override void OnInitialize(ResXData data)
+        protected sealed override void OnInitialize(ResXData data)
         {
             store = OnCreateListStore();
 
@@ -45,34 +45,28 @@ namespace MonoDevelop.ResXEditor
             AddPlaceholder();
         }
 
-        protected virtual Xwt.ListStore OnCreateListStore()
-        {
-            return new Xwt.ListStore(countField, nameField, valueField, commentField, typeField, nodeField);
-        }
+        protected sealed override Xwt.Widget CreateContent() => listView;
+
+        protected abstract bool SkipNode(ResXNode node);
+        protected virtual ResXNode GetPlaceholder() => null;
+        protected virtual Xwt.ListStore OnCreateListStore() => new Xwt.ListStore(countField, nameField, valueField, commentField, typeField, nodeField);
 
         protected virtual void AddListViewColumns(Xwt.ListViewColumnCollection collection)
         {
             collection.Add(" ", new Xwt.TextCellView(countField));
             collection.Add("Name", MakeEditableTextCell(nameField));
             collection.Add("Value", MakeEditableTextCell(valueField));
-            collection.Add("Comment", MakeEditableTextCell(commentField, ellipsize: true));
+            collection.Add("Comment", MakeEditableTextCell(commentField));
         }
 
         protected virtual void OnAddValues(Xwt.ListStore store, int row, ResXNode node)
         {
             store.SetValues(row,
-                            countField, row == store.RowCount - 1 ? "*" : string.Empty,
                             nameField, node.Name,
-                            valueField, node.ObjectValue.ToString(),
-                            commentField, node.Comment,
-                            typeField, node.TypeName,
+                            valueField, Data.GetValue(node).ToString(),
+                            commentField, node.Comment ?? string.Empty,
+                            typeField, node.TypeName ?? string.Empty,
                             nodeField, node);
-        }
-
-        protected abstract bool SkipNode(ResXNode node);
-        protected virtual ResXNode GetPlaceholder()
-        {
-            return null;
         }
 
         void AddPlaceholder()
@@ -82,14 +76,16 @@ namespace MonoDevelop.ResXEditor
             {
                 var row = store.AddRow();
                 OnAddValues(store, row, placeholder);
+                store.SetValue(row, countField, "*");
             }
         }
 
-        Xwt.TextCellView MakeEditableTextCell(Xwt.IDataField field, bool ellipsize = false)
+        protected Xwt.TextCellView MakeEditableTextCell(Xwt.IDataField field, bool ellipsize = false)
         {
             var etc = new Xwt.TextCellView(field)
             {
                 Editable = true,
+                Ellipsize = ellipsize ? Xwt.EllipsizeMode.End : Xwt.EllipsizeMode.None,
                 TextField = field,
             };
             etc.TextChanged += TextChanged;
@@ -105,7 +101,6 @@ namespace MonoDevelop.ResXEditor
 
             var menu = new ContextMenu();
             var mi = new ContextMenuItem("Remove Row");
-            mi.Context = listView;
             mi.Clicked += OnPopupMenuActivated;
             menu.Add(mi);
 
@@ -115,22 +110,19 @@ namespace MonoDevelop.ResXEditor
 
         void OnPopupMenuActivated(object o, ContextMenuItemClickedEventArgs args)
         {
-            var view = (Xwt.ListView)args.Context;
-            var dataSource = (Xwt.ListStore)view.DataSource;
-
             int removed = 0;
-            foreach (var row in view.SelectedRows)
+            foreach (var row in listView.SelectedRows)
             {
-                var name = dataSource.GetValue(row, nameField);
-                if (row == dataSource.RowCount - 1)
+                var name = store.GetValue(row, nameField);
+                if (row == store.RowCount - 1)
                 {
-                    dataSource.SetValues(row,
-                                         valueField, string.Empty,
-                                         commentField, null);
+                    store.SetValues(row,
+                                    valueField, string.Empty,
+                                    commentField, null);
                     continue;
                 }
 
-                dataSource.RemoveRow(row - removed++);
+                store.RemoveRow(row - removed++);
             }
             // FIXME: Serialize
             //Data.WriteToFile();
@@ -143,7 +135,6 @@ namespace MonoDevelop.ResXEditor
             var etc = (Xwt.TextCellView)o;
 
             var row = listView.CurrentEventRow;
-            var node = store.GetValue(row, nodeField);
             var name = store.GetValue(row, nameField);
             if (name == string.Empty)
             {
@@ -158,18 +149,32 @@ namespace MonoDevelop.ResXEditor
                 AddPlaceholder();
             }
 
-            // FIXME: Need Xwt with NewText in args.
-            string newText = etc.Text; // args.NewText;
+			// FIXME: Need Xwt with NewText in args.
+			string newText = etc.Text; // args.NewText;
+			var node = store.GetValue(row, nodeField);
+
+            args.Handled = UpdateNodeModel(node, etc, newText);
+            if (listView.CurrentEventRow == store.RowCount - 1)
+            {
+                if (name != string.Empty)
+                    AddPlaceholder();
+            }
+
+            // TODO: Maybe only do it on user save?
+            //listView.ColumnsAutosize();
+            //Data.WriteToFile();
+        }
+
+        bool UpdateNodeModel(ResXNode node, Xwt.TextCellView etc, string newText)
+        {
             if (etc.TextField == nameField)
             {
                 // If we already have a key with that name, revert to the old text, otherwise remove it from the set.
                 if (names.Contains(newText) || newText == string.Empty)
-                    args.Handled = false;
-                else
-                {
-                    names.Remove(etc.Text);
-                    names.Add(newText);
-                }
+                    return true;
+
+                names.Remove(etc.Text);
+                names.Add(newText);
                 node.Name = newText;
             }
             else if (etc.TextField == valueField)
@@ -181,29 +186,14 @@ namespace MonoDevelop.ResXEditor
                 }
                 catch
                 {
-                    args.Handled = false;
-                    return;
+                    return true;
                 }
             }
             else if (etc.TextField == commentField)
             {
                 node.Comment = newText;
             }
-
-            if (listView.CurrentEventRow == store.RowCount - 1)
-            {
-                if (name == string.Empty)
-                    return;
-            }
-
-            // TODO: Maybe only do it on user save?
-            //listView.ColumnsAutosize();
-            //Data.WriteToFile();
-        }
-
-        protected sealed override Xwt.Widget CreateContent()
-        {
-            return listView;
+            return false;
         }
     }
 }
