@@ -13,7 +13,7 @@ namespace MonoDevelop.ResXEditor
 		{
             IdeApp.Workbench.DocumentOpened += HandleDocumentOpened;
 
-			AddinManager.AddExtensionNodeHandler("/MonoDevelop/ResXEditor/ResXEditors", ExtensionNodesChanged);
+            AddinManager.AddExtensionNodeHandler(ResXEditorsExtensionPath, ExtensionNodesChanged);
 		}
 
 		static void ExtensionNodesChanged(object sender, ExtensionNodeEventArgs args)

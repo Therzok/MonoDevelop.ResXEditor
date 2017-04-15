@@ -5,20 +5,13 @@ namespace MonoDevelop.ResXEditor
 {
 	class ResXEditorOtherViewContent : ResXEditorListViewContent
 	{
-		public ResXEditorOtherViewContent(ResXData data) : base(data)
-		{
-			treeView.ShowAll();
-		}
+        protected override bool SkipNode(ResXNode node) =>  ResXEditorKnownEditors.IsKnownType(node.TypeName);
 
-		protected override bool SkipNode(ResXNode node)
+		protected override void AddColumns(Xwt.ListViewColumnCollection columns)
 		{
-			return ResXEditorKnownEditors.IsKnownType(node.Value.GetType());
-		}
-
-		protected override void AddTreeViewColumns()
-		{
-			base.AddTreeViewColumns();
-			treeView.AppendColumn("Type", crt, new Gtk.TreeCellDataFunc(TypeDataFunc));
+            base.AddColumns(columns);
+            columns.Add("Type", new Xwt.TextCellView ());
+//			listView.AppendColumn("Type", crt, new Gtk.TreeCellDataFunc(TypeDataFunc));
 		}
 
 		static void TypeDataFunc(Gtk.CellLayout cell_layout, Gtk.CellRenderer cell, Gtk.TreeModel tree_model, Gtk.TreeIter iter)
@@ -29,12 +22,6 @@ namespace MonoDevelop.ResXEditor
 			crt.Text = dataNode.TypeName;
 		}
 
-		public override string TabPageLabel
-		{
-			get
-			{
-				return "Other";
-			}
-		}
+        public override string TabPageLabel => "Other";
 	}
 }

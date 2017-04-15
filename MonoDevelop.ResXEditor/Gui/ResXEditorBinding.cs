@@ -12,10 +12,7 @@ namespace MonoDevelop.ResXEditor
 
 	class ResXStringDisplayBinding : ResXEditorBinding
 	{
-		public override ResXEditorViewContent CreateViewContent(ResXData data)
-		{
-			return new ResXEditorStringsViewContent(data);
-		}
+        public override ResXEditorViewContent CreateViewContent(ResXData data) => new ResXEditorStringsViewContent().Initialize(data);
 
 		public override IEnumerable<Type> TypesHandled
 		{
@@ -28,26 +25,21 @@ namespace MonoDevelop.ResXEditor
 
 	class ResXImageDisplayBinding : ResXEditorBinding
 	{
-		public override ResXEditorViewContent CreateViewContent(ResXData data)
-		{
-			return new ResXEditorImageViewContent(data);
-		}
+        public override ResXEditorViewContent CreateViewContent(ResXData data) => new ResXEditorImageViewContent().Initialize(data);
 
 		public override IEnumerable<Type> TypesHandled
 		{
 			get
 			{
-				yield break;
+                yield return typeof(System.Drawing.Bitmap);
+                yield return typeof(System.Drawing.Icon);
 			}
 		}
 	}
 
 	class ResXOtherDisplayBinding : ResXEditorBinding
 	{
-		public override ResXEditorViewContent CreateViewContent(ResXData data)
-		{
-			return new ResXEditorOtherViewContent(data);
-		}
+        public override ResXEditorViewContent CreateViewContent(ResXData data) => new ResXEditorOtherViewContent().Initialize(data);
 
 		public override IEnumerable<Type> TypesHandled
 		{

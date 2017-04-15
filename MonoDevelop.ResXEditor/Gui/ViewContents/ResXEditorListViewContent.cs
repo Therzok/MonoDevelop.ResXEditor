@@ -1,225 +1,189 @@
 ﻿using System;
 using System.Collections.Generic;
 using MonoDevelop.Components;
+using MonoDevelop.Core;
 
 namespace MonoDevelop.ResXEditor
 {
-	public abstract class ResXEditorListViewContent : ResXEditorViewContent
-	{
-		const string ResXDataKey = "source";
-		protected readonly Gtk.ListStore store;
-		protected readonly Gtk.TreeView treeView;
+    public abstract class ResXEditorListViewContent : ResXEditorViewContent
+    {
+        readonly Xwt.ListStore store;
+        readonly Xwt.ListView listView;
 
-		protected readonly Gtk.CellRendererText crt;
-		Gtk.CellRendererText crtName, crtValue, crtComment;
-		HashSet<string> names = new HashSet<string>();
-		ResXNode placeholder;
-		protected ResXEditorListViewContent(ResXData data) : base(data)
-		{
-			store = new Gtk.ListStore(typeof(ResXNode));
-			store.Data[ResXDataKey] = data;
-			treeView = new Gtk.TreeView(store)
-			{
-				EnableGridLines = Gtk.TreeViewGridLines.Both,
-			};
-			crt = new Gtk.CellRendererText();
+        HashSet<string> names = new HashSet<string>();
+        ResXNode placeholder;
+        Xwt.DataField<ResXNode> nodeField = new Xwt.DataField<ResXNode>();
+        protected ResXEditorListViewContent()
+        {
+            store = new Xwt.ListStore(nodeField);
+            listView = new Xwt.ListView(store)
+            {
+                GridLinesVisible = Xwt.GridLines.Both,
+            };
+            listView.ButtonPressed += OnButtonPress;
+            listView.Show();
+        }
 
-			treeView.ButtonPressEvent += OnTreeViewButtonPress;
+        protected override void OnInitialize(ResXData data)
+        {
+			AddPlaceholder();
+
+			AddColumns(listView.Columns);
+
 			foreach (var node in data.Nodes)
 			{
 				names.Add(node.Name);
 				if (SkipNode(node))
 					continue;
 
-				store.InsertWithValues(-1, node);
+				var row = store.AddRow();
+				store.SetValue(row, nodeField, node);
 			}
+        }
 
-			AddPlaceholder();
+        void OnButtonPress(object o, Xwt.ButtonEventArgs args)
+        {
+            if (args.Button != Xwt.PointerButton.Right)
+                return;
 
-			AddTreeViewColumns();
-		}
+            var listView = (Xwt.ListView)o;
+            var selection = listView.SelectedRows;
 
-		[GLib.ConnectBefore]
-		static void OnTreeViewButtonPress(object o, Gtk.ButtonPressEventArgs args)
-		{
-			args.RetVal = false;
-			if (args.Event.Type != Gdk.EventType.ButtonPress || args.Event.Button != 3)
-				return;
+            //listView.GetRowAtPosition(args.X, args.Y);
+            //select it
 
-			var treeView = (Gtk.TreeView)o;
-			var selection = treeView.Selection;
-			Gtk.TreePath path;
-			if (treeView.GetPathAtPos((int)args.Event.X, (int)args.Event.Y, out path))
-				selection.SelectPath(path);
-			else
-				return;
-			
-			args.RetVal = true;
-			var menu = new ContextMenu();
-			var mi = new ContextMenuItem("Remove Row");
-			mi.Context = selection;
-			mi.Clicked += OnPopupMenuActivated;
-			menu.Add(mi);
+            var menu = new ContextMenu();
+            var mi = new ContextMenuItem("Remove Row");
+            mi.Context = listView;
+            mi.Clicked += OnPopupMenuActivated;
+            menu.Add(mi);
 
-			// FIXME: Coordinates
-			menu.Show(treeView, (int)args.Event.X, (int)args.Event.Y);
-		}
+            // FIXME: Coordinates
+            menu.Show(listView.ToGtkWidget(), (int)args.X, (int)args.Y);
+        }
 
-		static void OnPopupMenuActivated(object o, ContextMenuItemClickedEventArgs args)
-		{
-			var selection = (Gtk.TreeSelection)args.Context;
-			var model = (Gtk.ListStore)selection.TreeView.Model;
-			var data = (ResXData)model.Data[ResXDataKey];
+        void OnPopupMenuActivated(object o, ContextMenuItemClickedEventArgs args)
+        {
+            var view = (Xwt.ListView)args.Context;
+            var dataSource = (Xwt.ListStore)view.DataSource;
 
-			foreach (var path in selection.GetSelectedRows())
-			{
-				Gtk.TreeIter iter;
-				if (!model.GetIter(out iter, path))
-					continue;
+            int removed = 0;
+            foreach (var row in view.SelectedRows)
+            {
+                var node = dataSource.GetValue<ResXNode>(row, nodeField);
+                if (node.Name == string.Empty)
+                {
+                    //node.Value = string.Empty;
+                    node.Comment = null;
+                    continue;
+                }
 
-				var node = (ResXNode)model.GetValue(iter, 0);
-				if (node.Name == string.Empty)
-				{
-					node.Value = string.Empty;
-					node.Comment = null;
-					continue;
-				}
+                dataSource.RemoveRow(row - removed++);
+                Data.Nodes.Remove(node);
+            }
+            Data.WriteToFile();
+            FileService.NotifyFileChanged(Data.Path);
+        }
 
-				if (!model.Remove(ref iter))
-					continue;
+        void AddPlaceholder()
+        {
+            placeholder = GetPlaceholder();
+            if (placeholder != null)
+            {
+                var row = store.AddRow();
+                store.SetValue(row, nodeField, placeholder);
+            }
+        }
 
-				data.Nodes.Remove(node);
-			}
-			data.WriteToFile();
-		}
+        protected virtual ResXNode GetPlaceholder()
+        {
+            return null;
+        }
 
-		void AddPlaceholder()
-		{
-			placeholder = GetPlaceholder();
-			if (placeholder != null)
-				store.InsertWithValues(-1, placeholder);
-		}
+        protected virtual void AddColumns(Xwt.ListViewColumnCollection columns)
+        {
+            //         columns.Add("", countField);
+            //columns.Add("Value", MakeEditableTextCell(valueField));
+            //columns.Add("Comment", MakeEditableTextCell(CommentField));
+            //columns.Add("", crt, new Gtk.TreeCellDataFunc(CountDataFunc));
+        }
 
-		protected virtual ResXNode GetPlaceholder()
-		{
-			return null;
-		}
+        protected abstract bool SkipNode(ResXNode node);
 
-		protected virtual void AddTreeViewColumns()
-		{
-			crtName = MakeEditableCellRenderer();
-			crtValue = MakeEditableCellRenderer();
-			crtComment = MakeEditableCellRenderer();
-			treeView.AppendColumn("", crt, new Gtk.TreeCellDataFunc(CountDataFunc));
-			treeView.AppendColumn("Name", crtName, new Gtk.TreeCellDataFunc(NameDataFunc));
-			treeView.AppendColumn("Value", crtValue, new Gtk.TreeCellDataFunc(ValueDataFunc));
-			treeView.AppendColumn("Comment", crtComment, new Gtk.TreeCellDataFunc(CommentDataFunc));
-		}
+        Xwt.TextCellView MakeEditableTextCell(Xwt.IDataField field)
+        {
+            var etc = new Xwt.TextCellView(field)
+            {
+                Editable = true,
+                TextField = null,
+            };
+            etc.TextChanged += TextChanged;
+            return etc;
+        }
 
-		protected abstract bool SkipNode(ResXNode node);
+        void TextChanged(object o, Xwt.WidgetEventArgs args)
+        {
+            //         var etc = (Xwt.TextCellView)o;
 
-		Gtk.CellRendererText MakeEditableCellRenderer()
-		{
-			var crt = new Gtk.CellRendererText { Editable = true };
-			crt.Edited += CellEdited;
-			return crt;
-		}
+            //         var node = (ResXNode)store.GetValue(listView.SelectedRow, 0);
+            //if (o == crtName)
+            //{
+            //	// We can't remove a node's name, nor can we duplicate it
+            //	if (args.NewText == string.Empty || names.Contains(args.NewText))
+            //		return;
 
-		void CellEdited(object o, Gtk.EditedArgs args)
-		{
-			Gtk.TreeIter iter;
-			if (!store.GetIterFromString(out iter, args.Path))
-				return;
+            //	node.Name = args.NewText;
+            //}
+            //else if (o == crtValue)
+            //{
+            //	try
+            //	{
+            //		node.Value = Convert.ChangeType(args.NewText, node.Value.GetType());
+            //	}
+            //	catch
+            //	{
+            //		return;
+            //	}
+            //}
+            //else if (o == crtComment)
+            //{
+            //	node.Comment = args.NewText;
+            //}
 
-			var node = (ResXNode)store.GetValue(iter, 0);
-			if (o == crtName)
-			{
-				// We can't remove a node's name, nor can we duplicate it
-				if (args.NewText == string.Empty || names.Contains(args.NewText))
-					return;
+            //if (node == placeholder)
+            //{
+            //	if (node.Name == string.Empty)
+            //		return;
 
-				node.Name = args.NewText;
-			}
-			else if (o == crtValue)
-			{
-				try
-				{
-					node.Value = Convert.ChangeType(args.NewText, node.Value.GetType());
-				}
-				catch
-				{
-					return;
-				}
-			}
-			else if (o == crtComment)
-			{
-				node.Comment = args.NewText;
-			}
+            //	Data.Nodes.Add(node);
+            //	AddPlaceholder();
+            //}
 
-			if (node == placeholder)
-			{
-				if (node.Name == string.Empty)
-					return;
+            //// TODO: Maybe only do it on user save?
+            //listView.ColumnsAutosize();
+            //Data.WriteToFile();
+        }
 
-				Data.Nodes.Add(node);
-				AddPlaceholder();
-			}
+        protected void CountDataFunc(Gtk.CellLayout cell_layout, Gtk.CellRenderer cell, Gtk.TreeModel tree_model, Gtk.TreeIter iter)
+        {
+            var dataNode = (ResXNode)tree_model.GetValue(iter, 0);
+            var crt = (Gtk.CellRendererText)cell;
+            if (dataNode.Name == string.Empty)
+            {
+                if (dataNode.Comment != null || (string)Data.GetValue(dataNode) != string.Empty)
+                    crt.Text = "!";
+                else
+                    crt.Text = "*";
+            }
+            else
+            {
+                crt.Text = string.Empty;
+            }
+        }
 
-			// TODO: Maybe only do it on user save?
-			treeView.ColumnsAutosize();
-			Data.WriteToFile();
-		}
-
-		protected static void CountDataFunc(Gtk.CellLayout cell_layout, Gtk.CellRenderer cell, Gtk.TreeModel tree_model, Gtk.TreeIter iter)
-		{
-			var dataNode = (ResXNode)tree_model.GetValue(iter, 0);
-			var crt = (Gtk.CellRendererText)cell;
-			if (dataNode.Name == string.Empty)
-			{
-				if (dataNode.Comment != null || (string)dataNode.Value != string.Empty)
-					crt.Text = "!";
-				else
-					crt.Text = "*";
-			}
-			else
-			{
-				crt.Text = string.Empty;
-			}
-		}
-
-		protected static void NameDataFunc(Gtk.CellLayout cell_layout, Gtk.CellRenderer cell, Gtk.TreeModel tree_model, Gtk.TreeIter iter)
-		{
-			var dataNode = (ResXNode)tree_model.GetValue(iter, 0);
-			var crt = (Gtk.CellRendererText)cell;
-
-			crt.Text = dataNode.Name;
-		}
-
-		protected static void ValueDataFunc(Gtk.CellLayout cell_layout, Gtk.CellRenderer cell, Gtk.TreeModel tree_model, Gtk.TreeIter iter)
-		{
-			var dataNode = (ResXNode)tree_model.GetValue(iter, 0);
-			var crt = (Gtk.CellRendererText)cell;
-
-			crt.Text = Convert.ToString(dataNode.Value);
-		}
-
-		protected static void CommentDataFunc(Gtk.CellLayout cell_layout, Gtk.CellRenderer cell, Gtk.TreeModel tree_model, Gtk.TreeIter iter)
-		{
-			var dataNode = (ResXNode)tree_model.GetValue(iter, 0);
-			var crt = (Gtk.CellRendererText)cell;
-
-			crt.Text = dataNode.Comment;
-		}
-
-		protected override Components.Control CreateContent()
-		{
-			return treeView;
-		}
-
-		public override void Dispose()
-		{
-			store.Data[ResXDataKey] = null;
-			base.Dispose();
-		}
-	}
+        protected override Xwt.Widget CreateContent()
+        {
+            return listView;
+        }
+    }
 }

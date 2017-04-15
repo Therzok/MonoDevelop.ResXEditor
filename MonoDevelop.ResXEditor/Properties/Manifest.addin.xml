@@ -11,11 +11,11 @@
 			class = "MonoDevelop.ResXEditor.ResXStringDisplayBinding" />
 		<!--
 		<Editor
-			id = "ResXStringEditor"
+			id = "ResXImageEditor"
 			class = "MonoDevelop.ResXEditor.ResXImageDisplayBinding" />
 		-->
 		<Editor
-			id = "ResXStringEditor"
+			id = "ResXOtherEditor"
 			class = "MonoDevelop.ResXEditor.ResXOtherDisplayBinding" />
 	</Extension>
 

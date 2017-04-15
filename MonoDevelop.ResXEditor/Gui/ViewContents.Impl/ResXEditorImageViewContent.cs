@@ -3,25 +3,15 @@ namespace MonoDevelop.ResXEditor
 {
 	class ResXEditorImageViewContent : ResXEditorGridViewContent
 	{
-		Gtk.HBox box;
-		public ResXEditorImageViewContent(ResXData data) : base(data)
+        Xwt.HBox box;
+		public ResXEditorImageViewContent()
 		{
-			box = new Gtk.HBox();
-            box.Add(new Gtk.Label("Hello world"));
-			box.ShowAll();
+			box = new Xwt.HBox();
+            box.PackStart(new Xwt.Label("Hello world"));
+            box.Show();
 		}
 
-		public override string TabPageLabel
-		{
-			get
-			{
-				return "Images";
-			}
-		}
-
-		protected override Components.Control CreateContent()
-		{
-			return box;
-		}
+        public override string TabPageLabel => "Images";
+        protected override Xwt.Widget CreateContent() => box;
 	}
 }

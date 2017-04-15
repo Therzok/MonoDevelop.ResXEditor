@@ -4,21 +4,28 @@ using MonoDevelop.Ide.Gui;
 
 namespace MonoDevelop.ResXEditor
 {
-	public abstract class ResXEditorViewContent : BaseViewContent
-	{
-		CompactScrolledWindow sw;
-		protected ResXEditorViewContent(ResXData data)
+    public abstract class ResXEditorViewContent : BaseViewContent
+    {
+        CompactScrolledWindow sw;
+        protected ResXEditorViewContent()
+        {
+        }
+
+        public ResXData Data
+        {
+            get;
+            private set;
+        }
+
+        internal ResXEditorViewContent Initialize(ResXData data)
 		{
 			Data = data;
-		}
+            OnInitialize(data);
+            return this;
+        }
 
-		public ResXData Data
-		{
-			get;
-			private set;
-		}
-
-		protected abstract Control CreateContent();
+        protected abstract void OnInitialize(ResXData data);
+        protected abstract Xwt.Widget CreateContent();
 
 		public override sealed Control Control
 		{
@@ -27,7 +34,7 @@ namespace MonoDevelop.ResXEditor
 				if (sw == null)
 				{
 					sw = new CompactScrolledWindow();
-					sw.Add(CreateContent());
+                    sw.Add(CreateContent().ToGtkWidget());
 					sw.ShowAll();
 				}
 				return sw;

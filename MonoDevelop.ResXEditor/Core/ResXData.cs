@@ -1,57 +1,80 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Resources;
-using MonoDevelop.Core;
 
 namespace MonoDevelop.ResXEditor
 {
-	public class ResXData
-	{
-		public IList<ResXNode> Nodes { get; private set; }
-		public IList<ResXNode> Metadata { get; private set; }
+    public class ResXData
+    {
+        public IList<ResXNode> Nodes { get; private set; }
+        public IList<ResXNode> Metadata { get; private set; }
 
-		FilePath path;
-		ResXData(FilePath path)
+        public string Path { get; }
+		ResXData(string path) => Path = path;
+
+		public T GetValue<T>(ResXNode node)
 		{
-			this.path = path;
+            return (T)GetValue(node);
 		}
 
-		public void WriteToFile()
-		{
-			using (var writer = new ResXResourceWriter(path))
-			{
-				foreach (var item in Nodes)
-					writer.AddResource(item);
+        public object GetValue(ResXNode node)
+        {
+            var fileRef = node.ObjectValue as ResXFileRef;
+            if (fileRef != null)
+            {
+                var absolutePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName (Path), fileRef.FileName);
+                var absoluteRef = new ResXFileRef(absolutePath, fileRef.TypeName, fileRef.TextFileEncoding);
+                var newNode = new ResXDataNode(node.Name, absoluteRef).GetValue(Constants.DefaultResolutionService);
+                return newNode;
+             }
+            return node.ObjectValue;
+        }
 
-				foreach (var item in Metadata)
-					writer.AddMetadata(item.Name, item.Value);
+        /*public object SetValue(ResXNode node)
+        {
+            if (objValue.GetType() != value.GetType())
+                throw new ArgumentException(string.Format("Type should be {0}, but was {1}", objValue.GetType(), value.GetType()), nameof(value));
 
-				writer.Generate();
-			}
-			FileService.NotifyFileChanged(path);
-		}
+            objValue = value;
+        }*/
 
-		internal static ResXData FromFile(FilePath path)
-		{
-			List<ResXNode> nodes, metadata;
-			using (var reader = new ResXResourceReader(path) { UseResXDataNodes = true, }) {
-				nodes = reader.Cast<DictionaryEntry>().Select(x => (ResXNode)(ResXDataNode)x.Value).ToList();
-				metadata = new List<ResXNode>();
+        public void WriteToFile()
+        {
+            using (var writer = new ResXResourceWriter(Path))
+            {
+                foreach (var item in Nodes)
+                    writer.AddResource(item);
 
-				var enumerator = reader.GetMetadataEnumerator();
-				while (enumerator.MoveNext())
-				{
-					metadata.Add((ResXDataNode)enumerator.Value);
-				}
-			}
+                foreach (var item in Metadata)
+                    writer.AddMetadata(item.Name, GetValue(item));
 
-			return new ResXData (path)
-			{
-				Nodes = nodes,
-				Metadata = metadata,
-			};
-		}
-	}
+                writer.Generate();
+            }
+        }
+
+        public static ResXData FromFile(string path)
+        {
+            List<ResXNode> nodes, metadata;
+            using (var reader = new ResXResourceReader(path) { UseResXDataNodes = true, })
+            {
+                nodes = reader.Cast<DictionaryEntry>().Select(x => (ResXNode)(ResXDataNode)x.Value).ToList();
+                metadata = new List<ResXNode>();
+
+                var enumerator = reader.GetMetadataEnumerator();
+                while (enumerator.MoveNext())
+                {
+                    metadata.Add((ResXDataNode)enumerator.Value);
+                }
+            }
+
+            return new ResXData(path)
+            {
+                Nodes = nodes,
+                Metadata = metadata,
+            };
+        }
+    }
 }
