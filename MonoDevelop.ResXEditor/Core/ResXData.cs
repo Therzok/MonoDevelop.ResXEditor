@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Resources;
+using MonoDevelop.Core;
 
 namespace MonoDevelop.ResXEditor
 {
@@ -17,6 +18,14 @@ namespace MonoDevelop.ResXEditor
         ResXData(string path)
         {
             Path = path;
+        }
+
+        internal ResXNode CreateNode (string path, Type type)
+        {
+            FilePath absPath = path;
+            FilePath relPath = absPath.ToRelative(((FilePath)Path).ParentDirectory);
+            var fileRef = new ResXFileRef(relPath, type.AssemblyQualifiedName);
+            return new ResXDataNode(absPath.FileNameWithoutExtension, fileRef);
         }
 
         public T GetValue<T>(ResXNode node)

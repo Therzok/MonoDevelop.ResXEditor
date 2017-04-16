@@ -7,8 +7,6 @@ namespace MonoDevelop.ResXEditor
         {
             if (node.TypeName == typeof(System.Drawing.Bitmap).AssemblyQualifiedName)
                 return (System.Drawing.Image)data.GetValue(node);
-            if (node.TypeName == typeof(System.Drawing.Image).AssemblyQualifiedName)
-                return (System.Drawing.Image)data.GetValue(node);
             if (node.TypeName == typeof(System.Drawing.Icon).AssemblyQualifiedName)
                 return ((System.Drawing.Icon)data.GetValue(node)).ToBitmap();
             return null;
@@ -45,8 +43,7 @@ namespace MonoDevelop.ResXEditor
         // Make this smarter.
         protected override bool SkipNode(ResXNode node) =>
             !(node.TypeName == typeof(System.Drawing.Bitmap).AssemblyQualifiedName) &&
-            !(node.TypeName == typeof(System.Drawing.Icon).AssemblyQualifiedName) &&
-            !(node.TypeName == typeof(System.Drawing.Image).AssemblyQualifiedName);
+            !(node.TypeName == typeof(System.Drawing.Icon).AssemblyQualifiedName);
 
         public override string TabPageLabel => "Images";
 	}

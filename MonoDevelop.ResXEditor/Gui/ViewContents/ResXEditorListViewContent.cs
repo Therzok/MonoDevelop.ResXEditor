@@ -10,6 +10,7 @@ namespace MonoDevelop.ResXEditor
     {
         Xwt.ListStore store;
         Xwt.ListView listView;
+        int[] oldRows;
 
         protected readonly Xwt.DataField<string> countField = new Xwt.DataField<string>();
         protected readonly Xwt.DataField<string> nameField = new Xwt.DataField<string>();
@@ -26,6 +27,22 @@ namespace MonoDevelop.ResXEditor
             {
                 GridLinesVisible = Xwt.GridLines.Both,
                 SelectionMode = Xwt.SelectionMode.Multiple,
+            };
+            listView.SelectionChanged += (sender, e) => {
+                if (oldRows != null)
+                {
+                    foreach (var row in oldRows)
+                    {
+                        if (row == store.RowCount - 1)
+                            store.SetValue(row, countField, "*");
+                        else
+                            store.SetValue(row, countField, string.Empty);
+                    }
+                }
+
+                oldRows = listView.SelectedRows;
+                foreach (var row in oldRows)
+                    store.SetValue(row, countField, "▶");
             };
             listView.ButtonPressed += OnButtonPress;
             listView.Show();
@@ -45,16 +62,6 @@ namespace MonoDevelop.ResXEditor
             AddPlaceholder();
         }
 
-        Xwt.Button CreateAddButton()
-        {
-            // TODO: IMPL
-            var addButton = new Xwt.Button("Add Resource") {
-                Type = Xwt.ButtonType.DropDown,
-            };
-            //addButton.Clicked += (sender, e) => RemoveSelectedRows();
-            return addButton;
-        }
-
         Xwt.Button CreateRemoveButton()
         {
             var removeButton = new Xwt.Button("Remove Resource")
@@ -71,31 +78,13 @@ namespace MonoDevelop.ResXEditor
             return removeButton;
         }
 
-        Xwt.ComboBox CreateGenerationCombo()
-        {
-            var generationCombo = new Xwt.ComboBox();
-            generationCombo.Items.Add("ResXFileCodeGenerator", "Internal");
-            generationCombo.Items.Add("PublicResXFileCodeGenerator", "Public");
-            generationCombo.Items.Add("", "No code generation");
-
-            int selectedIndex = generationCombo.Items.IndexOf(Data.ProjectFile.Generator);
-            generationCombo.SelectedIndex = selectedIndex != -1 ? selectedIndex : 2;
-
-            generationCombo.SelectionChanged += (sender, e) => Data.ProjectFile.Generator = (string)generationCombo.SelectedItem;
-            return generationCombo;
-        }
-
         protected override void OnToolbarSet()
         {
             base.OnToolbarSet();
 
-            Toolbar.Add(CreateRemoveButton().ToGtkWidget());
-            Toolbar.Add(new Xwt.VSeparator().ToGtkWidget());
-            if (Data.ProjectFile != null)
-                Toolbar.Add(CreateGenerationCombo().ToGtkWidget());
+            Toolbar.Add(new XwtControl (CreateRemoveButton()));
         }
 
-        protected sealed override bool HasToolbar => true;
         protected sealed override Xwt.Widget CreateContent() => listView;
 
         protected abstract bool SkipNode(ResXNode node);
@@ -150,13 +139,12 @@ namespace MonoDevelop.ResXEditor
 
             var selection = listView.SelectedRows;
 
-            var menu = new ContextMenu();
-            var mi = new ContextMenuItem("Remove Row");
+            var menu = new Xwt.Menu();
+            var mi = new Xwt.MenuItem("Remove Row");
+            menu.Items.Add(mi);
             mi.Clicked += (sender, e) => RemoveSelectedRows();
-            menu.Add(mi);
 
-            // FIXME: Coordinates
-            menu.Show(listView.ToGtkWidget(), (int)args.X, (int)args.Y);
+            menu.Popup(listView, args.X, args.Y);
         }
 
         void RemoveSelectedRows()

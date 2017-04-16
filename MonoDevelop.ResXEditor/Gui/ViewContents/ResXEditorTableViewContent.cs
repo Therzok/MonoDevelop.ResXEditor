@@ -21,12 +21,8 @@ namespace MonoDevelop.ResXEditor
                 var image = GetImage(node);
                 if (image == null)
                     continue;
-
-                if (image.Size.Width > 150 || image.Size.Height > 150) {
-                    image = image.WithBoxSize(150);
-                }
-                var view = new Xwt.ImageView(image);
-                table.Add(view, col++, row);
+                
+                table.Add(CreateItem(node.Name, image), col++, row);
                 if (col == 3) {
                     col = 0;
                     row++;
@@ -34,9 +30,28 @@ namespace MonoDevelop.ResXEditor
             }
         }
 
+        Xwt.Widget CreateItem (string title, Xwt.Drawing.Image image)
+        {
+            if (image.Size.Width > 150 || image.Size.Height > 150)
+            {
+                image = image.WithBoxSize(150);
+            }
+
+            var vbox = new Xwt.VBox();
+            vbox.PackStart(new Xwt.Label(title)
+            {
+                HorizontalPlacement = Xwt.WidgetPlacement.Center,
+                TextAlignment = Xwt.Alignment.Center,
+            });
+            vbox.PackStart(new Xwt.ImageView(image)
+            {
+                HorizontalPlacement = Xwt.WidgetPlacement.Center,
+            });
+            return vbox;
+        }
+
         protected sealed override Xwt.Widget CreateContent() => table;
         protected abstract Xwt.Drawing.Image GetImage(ResXNode node);
         protected abstract bool SkipNode(ResXNode node);
-        protected override bool HasToolbar => true;
     }
 }
