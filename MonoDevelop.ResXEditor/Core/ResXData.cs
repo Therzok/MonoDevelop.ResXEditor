@@ -12,8 +12,12 @@ namespace MonoDevelop.ResXEditor
         public IList<ResXNode> Nodes { get; private set; }
         public IList<ResXNode> Metadata { get; private set; }
         public string Path { get; }
+        public Projects.ProjectFile ProjectFile { get; private set; }
 
-        ResXData(string path) => Path = path;
+        ResXData(string path)
+        {
+            Path = path;
+        }
 
         public T GetValue<T>(ResXNode node)
 		{
@@ -22,15 +26,14 @@ namespace MonoDevelop.ResXEditor
 
 		public object GetValue(ResXNode node)
 		{
-			var fileRef = node.ObjectValue as ResXFileRef;
-			if (fileRef != null)
-			{
-				var absolutePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Path), fileRef.FileName);
-				var absoluteRef = new ResXFileRef(absolutePath, fileRef.TypeName, fileRef.TextFileEncoding);
-				var newNode = new ResXDataNode(node.Name, absoluteRef).GetValue(Constants.DefaultResolutionService);
-				return newNode;
-			}
-			return node.ObjectValue;
+            if (node.ObjectValue is ResXFileRef fileRef)
+            {
+                var absolutePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Path), fileRef.FileName);
+                var absoluteRef = new ResXFileRef(absolutePath, fileRef.TypeName, fileRef.TextFileEncoding);
+                var newNode = new ResXDataNode(node.Name, absoluteRef).GetValue(Constants.DefaultResolutionService);
+                return newNode;
+            }
+            return node.ObjectValue;
 		}
 
         /*public object SetValue(ResXNode node)
@@ -53,6 +56,13 @@ namespace MonoDevelop.ResXEditor
 
                 writer.Generate();
             }
+        }
+
+        public static ResXData FromFile(Projects.ProjectFile pf)
+        {
+            var ret = FromFile(pf.FilePath);
+            ret.ProjectFile = pf;
+            return ret;
         }
 
         public static ResXData FromFile(string path)

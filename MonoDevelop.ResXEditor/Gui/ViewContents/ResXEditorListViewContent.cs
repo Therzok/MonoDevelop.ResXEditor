@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using MonoDevelop.Components;
 using MonoDevelop.Core;
 
@@ -45,6 +46,47 @@ namespace MonoDevelop.ResXEditor
             AddPlaceholder();
         }
 
+        Xwt.Button CreateRemoveButton()
+        {
+            var removeButton = new Xwt.Button("Remove Resource")
+            {
+                Sensitive = false,
+            };
+            removeButton.Clicked += (sender, e) => RemoveSelectedRows();
+            listView.SelectionChanged += (sender, e) =>
+            {
+                var rows = listView.SelectedRows.Length;
+                removeButton.Sensitive = rows > 0;
+                removeButton.Label = rows > 1 ? "Remove Resources" : "Remove Resource";
+            };
+            return removeButton;
+        }
+
+        Xwt.ComboBox CreateGenerationCombo()
+        {
+            var generationCombo = new Xwt.ComboBox();
+            generationCombo.Items.Add("ResXFileCodeGenerator", "Internal");
+            generationCombo.Items.Add("PublicResXFileCodeGenerator", "Public");
+            generationCombo.Items.Add("", "No code generation");
+
+            int selectedIndex = generationCombo.Items.IndexOf(Data.ProjectFile.Generator);
+            generationCombo.SelectedIndex = selectedIndex != -1 ? selectedIndex : 2;
+
+            generationCombo.SelectionChanged += (sender, e) => Data.ProjectFile.Generator = (string)generationCombo.SelectedItem;
+            return generationCombo;
+        }
+
+        protected override void OnToolbarSet()
+        {
+            base.OnToolbarSet();
+
+            Toolbar.Add(CreateRemoveButton().ToGtkWidget());
+            Toolbar.Add(new Xwt.VSeparator().ToGtkWidget());
+            if (Data.ProjectFile != null)
+                Toolbar.Add(CreateGenerationCombo().ToGtkWidget());
+        }
+
+        protected sealed override bool HasToolbar => true;
         protected sealed override Xwt.Widget CreateContent() => listView;
 
         protected abstract bool SkipNode(ResXNode node);
@@ -101,14 +143,14 @@ namespace MonoDevelop.ResXEditor
 
             var menu = new ContextMenu();
             var mi = new ContextMenuItem("Remove Row");
-            mi.Clicked += OnPopupMenuActivated;
+            mi.Clicked += (sender, e) => RemoveSelectedRows();
             menu.Add(mi);
 
             // FIXME: Coordinates
             menu.Show(listView.ToGtkWidget(), (int)args.X, (int)args.Y);
         }
 
-        void OnPopupMenuActivated(object o, ContextMenuItemClickedEventArgs args)
+        void RemoveSelectedRows()
         {
             int removed = 0;
             foreach (var row in listView.SelectedRows)
@@ -129,7 +171,6 @@ namespace MonoDevelop.ResXEditor
             //FileService.NotifyFileChanged(Data.Path);
         }
 
-
         void TextChanged(object o, Xwt.WidgetEventArgs args)
         {
             var etc = (Xwt.TextCellView)o;
@@ -149,9 +190,9 @@ namespace MonoDevelop.ResXEditor
                 AddPlaceholder();
             }
 
-			// FIXME: Need Xwt with NewText in args.
-			string newText = etc.Text; // args.NewText;
-			var node = store.GetValue(row, nodeField);
+            // FIXME: Need Xwt with NewText in args.
+            string newText = etc.Text; // args.NewText;
+            var node = store.GetValue(row, nodeField);
 
             args.Handled = UpdateNodeModel(node, etc, newText);
             if (listView.CurrentEventRow == store.RowCount - 1)

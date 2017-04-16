@@ -38,8 +38,13 @@ namespace MonoDevelop.ResXEditor
 			    DesktopService.GetMimeTypeForUri(document.FileName) != "text/microsoft-resx")
 				return;
 
-			// Load resx data.
-			var resx = ResXData.FromFile(document.FileName);
+            // Load resx data.
+            ResXData resx;
+            if (e.Document.HasProject)
+                resx = ResXData.FromFile(e.Document.Project.Files.GetFile(e.Document.FileName));
+            else
+                resx = ResXData.FromFile(e.Document.FileName);
+
 			int index = 0;
 			foreach (var editor in AddinManager.GetExtensionObjects<ResXEditorBinding>(ResXEditorsExtensionPath))
 			{

@@ -8,5 +8,7 @@ namespace MonoDevelop.ResXEditor
         protected override void OnInitialize(ResXData data)
         {
         }
+
+        protected override bool HasToolbar => true;
     }
 }
