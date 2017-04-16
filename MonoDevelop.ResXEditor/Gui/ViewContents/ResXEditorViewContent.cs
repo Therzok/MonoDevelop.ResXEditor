@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using MonoDevelop.Components;
 using MonoDevelop.Ide.Gui;
 
@@ -11,6 +12,7 @@ namespace MonoDevelop.ResXEditor
         {
         }
 
+        readonly protected HashSet<string> names = new HashSet<string>();
         protected ResXData Data { get; private set; }
         protected DocumentToolbar Toolbar { get; private set; }
 

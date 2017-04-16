@@ -1,53 +1,53 @@
 ﻿using System;
 namespace MonoDevelop.ResXEditor
 {
-	class ResXEditorImageViewContent : ResXEditorGridViewContent
+	class ResXEditorImageViewContent : ResXEditorTableViewContent
 	{
-        Xwt.HBox box;
-        Xwt.ImageView view;
-		public ResXEditorImageViewContent()
-		{
-			box = new Xwt.HBox();
-            box.PackStart(view = new Xwt.ImageView());
-            box.Show();
-		}
-
-        System.Drawing.Image GetImageFromNode(ResXData data, ResXNode node)
+        System.Drawing.Image GetDrawingImage(ResXData data, ResXNode node)
         {
+            if (node.TypeName == typeof(System.Drawing.Bitmap).AssemblyQualifiedName)
+                return (System.Drawing.Image)data.GetValue(node);
             if (node.TypeName == typeof(System.Drawing.Image).AssemblyQualifiedName)
                 return (System.Drawing.Image)data.GetValue(node);
-
             if (node.TypeName == typeof(System.Drawing.Icon).AssemblyQualifiedName)
                 return ((System.Drawing.Icon)data.GetValue(node)).ToBitmap();
             return null;
         }
 
-        protected override void OnInitialize(ResXData data)
+        protected override Xwt.Drawing.Image GetImage(ResXNode node)
         {
-            foreach (var node in data.Nodes)
+            var bitmap = GetDrawingImage(Data, node);
+            if (bitmap == null)
+                return null;
+
+            var path = System.IO.Path.GetTempFileName();
+            try
             {
-                var bitmap = GetImageFromNode(data, node);
-                if (bitmap == null)
-                    continue;
                 // FIXME: No idea why memory stream loading does not work.
                 //new System.IO.MemoryStream ())
-                //            {
-                //                bitmap.Save(ms, bitmap.RawFormat);
-                //                view.Image = Xwt.Drawing.Image.FromStream(ms);
+                //{
+                //    bitmap.Save(ms, bitmap.RawFormat);
+                //    view.Image = Xwt.Drawing.Image.FromStream(ms);
                 //}
 
-                var path = System.IO.Path.GetTempFileName();
                 using (var ms = System.IO.File.OpenWrite(path))
                 {
                     bitmap.Save(ms, bitmap.RawFormat);
                 }
-                view.Image = Xwt.Drawing.Image.FromFile(path);
+                return Xwt.Drawing.Image.FromFile(path);
+            }
+            finally
+            {
                 System.IO.File.Delete(path);
             }
-            base.OnInitialize(data);
         }
 
+        // Make this smarter.
+        protected override bool SkipNode(ResXNode node) =>
+            !(node.TypeName == typeof(System.Drawing.Bitmap).AssemblyQualifiedName) &&
+            !(node.TypeName == typeof(System.Drawing.Icon).AssemblyQualifiedName) &&
+            !(node.TypeName == typeof(System.Drawing.Image).AssemblyQualifiedName);
+
         public override string TabPageLabel => "Images";
-        protected override Xwt.Widget CreateContent() => box;
 	}
 }

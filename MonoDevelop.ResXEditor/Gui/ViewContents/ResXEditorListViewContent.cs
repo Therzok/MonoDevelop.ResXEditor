@@ -11,7 +11,6 @@ namespace MonoDevelop.ResXEditor
         Xwt.ListStore store;
         Xwt.ListView listView;
 
-        readonly HashSet<string> names = new HashSet<string>();
         protected readonly Xwt.DataField<string> countField = new Xwt.DataField<string>();
         protected readonly Xwt.DataField<string> nameField = new Xwt.DataField<string>();
         protected readonly Xwt.DataField<string> valueField = new Xwt.DataField<string>();
@@ -44,6 +43,16 @@ namespace MonoDevelop.ResXEditor
             }
 
             AddPlaceholder();
+        }
+
+        Xwt.Button CreateAddButton()
+        {
+            // TODO: IMPL
+            var addButton = new Xwt.Button("Add Resource") {
+                Type = Xwt.ButtonType.DropDown,
+            };
+            //addButton.Clicked += (sender, e) => RemoveSelectedRows();
+            return addButton;
         }
 
         Xwt.Button CreateRemoveButton()
