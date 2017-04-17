@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Resources;
 using MonoDevelop.Core;
@@ -10,6 +9,7 @@ namespace MonoDevelop.ResXEditor
 {
     public class ResXData
     {
+        // Implement notifications to handle this better.
         public IList<ResXNode> Nodes { get; private set; }
         public IList<ResXNode> Metadata { get; private set; }
         public string Path { get; }
@@ -20,21 +20,29 @@ namespace MonoDevelop.ResXEditor
             Path = path;
         }
 
-        internal ResXNode CreateNode (string path, Type type)
+        public ResXNode CreateNode(FilePath absPath, Type type)
         {
-            FilePath absPath = path;
             FilePath relPath = absPath.ToRelative(((FilePath)Path).ParentDirectory);
             var fileRef = new ResXFileRef(relPath, type.AssemblyQualifiedName);
             return new ResXDataNode(absPath.FileNameWithoutExtension, fileRef);
         }
 
-        public T GetValue<T>(ResXNode node)
-		{
-			return (T)GetValue(node);
-		}
+        public System.Drawing.Image GetDrawingImage(ResXNode node)
+        {
+            if (node.TypeName == typeof(System.Drawing.Bitmap).AssemblyQualifiedName)
+                return (System.Drawing.Image)GetValue(node);
+            if (node.TypeName == typeof(System.Drawing.Icon).AssemblyQualifiedName)
+                return ((System.Drawing.Icon)GetValue(node)).ToBitmap();
+            return null;
+        }
 
-		public object GetValue(ResXNode node)
-		{
+        public T GetValue<T>(ResXNode node)
+        {
+            return (T)GetValue(node);
+        }
+
+        public object GetValue(ResXNode node)
+        {
             if (node.ObjectValue is ResXFileRef fileRef)
             {
                 var absolutePath = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Path), fileRef.FileName);
@@ -43,15 +51,15 @@ namespace MonoDevelop.ResXEditor
                 return newNode;
             }
             return node.ObjectValue;
-		}
+        }
 
-        /*public object SetValue(ResXNode node)
+        public void SetValue(ResXNode node, object value)
         {
-            if (objValue.GetType() != value.GetType())
-                throw new ArgumentException(string.Format("Type should be {0}, but was {1}", objValue.GetType(), value.GetType()), nameof(value));
+            if (node.ObjectValue.GetType() != value.GetType())
+                throw new ArgumentException(string.Format("Type should be {0}, but was {1}", node.ObjectValue.GetType(), value.GetType()), nameof(value));
 
-            objValue = value;
-        }*/
+            node.ObjectValue = value;
+        }
 
         public void WriteToFile(IEnumerable<ResXNode> nodes)
         {

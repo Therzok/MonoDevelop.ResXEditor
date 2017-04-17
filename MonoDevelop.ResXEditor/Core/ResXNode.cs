@@ -1,8 +1,4 @@
-﻿using System;
-using System.Diagnostics.Contracts;
-using System.Reflection;
-using System.Resources;
-using System.Windows.Forms;
+﻿using System.Resources;
 
 namespace MonoDevelop.ResXEditor
 {
@@ -29,7 +25,6 @@ namespace MonoDevelop.ResXEditor
         public string TypeName { get; set; }
         internal object ObjectValue { get; set; }
 
-        [Pure]
         public static implicit operator ResXDataNode(ResXNode node)
         {
             var fileRef = node.ObjectValue as ResXFileRef;
@@ -43,7 +38,6 @@ namespace MonoDevelop.ResXEditor
             return resxNode;
         }
 
-        [Pure]
         public static implicit operator ResXNode(ResXDataNode node)
         {
             return new ResXNode(

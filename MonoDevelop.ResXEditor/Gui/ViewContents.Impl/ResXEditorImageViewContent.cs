@@ -1,20 +1,10 @@
-﻿using System;
-namespace MonoDevelop.ResXEditor
+﻿namespace MonoDevelop.ResXEditor
 {
-	class ResXEditorImageViewContent : ResXEditorTableViewContent
+    class ResXEditorImageViewContent : ResXEditorTableViewContent
 	{
-        System.Drawing.Image GetDrawingImage(ResXData data, ResXNode node)
-        {
-            if (node.TypeName == typeof(System.Drawing.Bitmap).AssemblyQualifiedName)
-                return (System.Drawing.Image)data.GetValue(node);
-            if (node.TypeName == typeof(System.Drawing.Icon).AssemblyQualifiedName)
-                return ((System.Drawing.Icon)data.GetValue(node)).ToBitmap();
-            return null;
-        }
-
         protected override Xwt.Drawing.Image GetImage(ResXNode node)
         {
-            var bitmap = GetDrawingImage(Data, node);
+            var bitmap = Data.GetDrawingImage(node);
             if (bitmap == null)
                 return null;
 
@@ -28,10 +18,8 @@ namespace MonoDevelop.ResXEditor
                 //    view.Image = Xwt.Drawing.Image.FromStream(ms);
                 //}
 
-                using (var ms = System.IO.File.OpenWrite(path))
-                {
-                    bitmap.Save(ms, bitmap.RawFormat);
-                }
+                using (var fs = System.IO.File.OpenWrite(path))
+                    bitmap.Save(fs, bitmap.RawFormat);
                 return Xwt.Drawing.Image.FromFile(path);
             }
             finally
@@ -40,11 +28,9 @@ namespace MonoDevelop.ResXEditor
             }
         }
 
-        // Make this smarter.
         protected override bool SkipNode(ResXNode node) =>
             !(node.TypeName == typeof(System.Drawing.Bitmap).AssemblyQualifiedName) &&
             !(node.TypeName == typeof(System.Drawing.Icon).AssemblyQualifiedName);
-
         public override string TabPageLabel => "Images";
 	}
 }

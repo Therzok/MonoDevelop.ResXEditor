@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
 using MonoDevelop.Components;
-using MonoDevelop.Core;
 
 namespace MonoDevelop.ResXEditor
 {
@@ -81,7 +78,6 @@ namespace MonoDevelop.ResXEditor
         protected override void OnToolbarSet()
         {
             base.OnToolbarSet();
-
             Toolbar.Add(new XwtControl (CreateRemoveButton()));
         }
 

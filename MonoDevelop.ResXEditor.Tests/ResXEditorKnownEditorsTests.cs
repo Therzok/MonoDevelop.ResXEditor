@@ -14,12 +14,19 @@ namespace MonoDevelop.ResXEditor.Tests
 
         };
 
-		[Test]
+        [Test]
         [Ignore("No support for loading MD stuff yet")]
         public void CheckRegisteredTypes()
         {
-            var types = typeof(ResXEditorKnownEditors).Assembly.GetTypes()
-                                                      .Where(x => x.IsSubclassOf(typeof(ResXEditorBinding)) && !x.IsAbstract);
+            System.Collections.Generic.IEnumerable<Type> types = Enumerable.Empty<Type>();
+            try
+            {
+                types = typeof(ResXEditorKnownEditors).Assembly.GetTypes()
+                                                          .Where(x => x.IsSubclassOf(typeof(ResXEditorBinding)) && !x.IsAbstract);
+            } catch (Exception e)
+            {
+                
+            }
 
             foreach (var type in types)
             {

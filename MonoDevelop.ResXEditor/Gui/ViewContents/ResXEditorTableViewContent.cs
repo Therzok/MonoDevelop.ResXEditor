@@ -1,7 +1,4 @@
-﻿using System;
-using MonoDevelop.Components;
-
-namespace MonoDevelop.ResXEditor
+﻿namespace MonoDevelop.ResXEditor
 {
     public abstract class ResXEditorTableViewContent : ResXEditorViewContent
     {

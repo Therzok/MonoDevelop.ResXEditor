@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Resources;
 using MonoDevelop.Components;
-using MonoDevelop.Core;
 using MonoDevelop.Ide.Gui;
 
 namespace MonoDevelop.ResXEditor
@@ -10,9 +8,6 @@ namespace MonoDevelop.ResXEditor
     public abstract class ResXEditorViewContent : AbstractXwtViewContent
     {
         Xwt.ScrollView sw;
-        protected ResXEditorViewContent()
-        {
-        }
 
         readonly protected HashSet<string> names = new HashSet<string>();
         protected ResXData Data { get; private set; }
@@ -25,10 +20,11 @@ namespace MonoDevelop.ResXEditor
             return this;
         }
 
-        Xwt.MenuItem CreateMenuItem (string label, Type nodeType)
+        Xwt.MenuItem CreateMenuItem(string label, Type nodeType)
         {
             var mi = new Xwt.MenuItem(label);
-            mi.Clicked += (sender, e) => {
+            mi.Clicked += (sender, e) =>
+            {
                 using (var dialog = new Xwt.OpenFileDialog())
                 {
                     if (!dialog.Run(sw.ParentWindow))
@@ -49,7 +45,7 @@ namespace MonoDevelop.ResXEditor
             return new Xwt.MenuButton("Add Resource")
             {
                 Menu = menu,
-            };;
+            };
         }
 
         Xwt.ComboBox CreateGenerationCombo()
@@ -91,12 +87,12 @@ namespace MonoDevelop.ResXEditor
 
         protected virtual void OnToolbarSet()
         {
+            
         }
-
 		protected abstract void OnInitialize(ResXData data);
         protected abstract Xwt.Widget CreateContent();
 
-        protected override void OnWorkbenchWindowChanged()
+        protected sealed override void OnWorkbenchWindowChanged()
         {
             base.OnWorkbenchWindowChanged();
 
@@ -113,6 +109,6 @@ namespace MonoDevelop.ResXEditor
             }
         }
 
-        public override Xwt.Widget Widget => sw ?? (sw = new Xwt.ScrollView(CreateContent()) { Visible = true });
+        public sealed override Xwt.Widget Widget => sw ?? (sw = new Xwt.ScrollView(CreateContent()) { Visible = true });
     }
 }
