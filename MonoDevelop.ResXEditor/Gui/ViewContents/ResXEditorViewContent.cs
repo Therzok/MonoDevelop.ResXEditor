@@ -64,7 +64,6 @@ namespace MonoDevelop.ResXEditor
 
         Xwt.ComboBox CreateLanguageCombo()
         {
-            // TODO: Verify why project is null.
             // TODO: Also do this on addition of files.
             // TODO: Handle source editor?
             // TODO: Add functionality.
@@ -83,7 +82,6 @@ namespace MonoDevelop.ResXEditor
 
         protected virtual void OnToolbarSet()
         {
-
         }
 
         protected abstract void OnInitialize(ResXData data);

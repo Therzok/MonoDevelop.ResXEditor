@@ -9,6 +9,8 @@
 
             int row = 0;
             int col = 0;
+
+            // smart resizing
             foreach (var node in data.Nodes)
             {
                 names.Add(node.Name);

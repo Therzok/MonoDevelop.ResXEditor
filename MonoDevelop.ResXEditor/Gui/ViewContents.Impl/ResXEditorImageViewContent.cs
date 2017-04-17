@@ -11,16 +11,12 @@
             var path = System.IO.Path.GetTempFileName();
             try
             {
-                // FIXME: No idea why memory stream loading does not work.
-                //new System.IO.MemoryStream ())
-                //{
-                //    bitmap.Save(ms, bitmap.RawFormat);
-                //    view.Image = Xwt.Drawing.Image.FromStream(ms);
-                //}
-
-                using (var fs = System.IO.File.OpenWrite(path))
-                    bitmap.Save(fs, bitmap.RawFormat);
-                return Xwt.Drawing.Image.FromFile(path);
+                using (var ms = new System.IO.MemoryStream ())
+                {
+                    bitmap.Save(ms, bitmap.RawFormat);
+                    ms.Position = 0;
+                    return Xwt.Drawing.Image.FromStream(ms);
+                }
             }
             finally
             {
