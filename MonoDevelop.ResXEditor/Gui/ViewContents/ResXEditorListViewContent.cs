@@ -133,7 +133,7 @@ namespace MonoDevelop.ResXEditor
             if (args.Button != Xwt.PointerButton.Right)
                 return;
 
-            var selection = listView.SelectedRows;
+            args.Handled = true;
 
             var menu = new Xwt.Menu();
             var mi = new Xwt.MenuItem("Remove Row");
