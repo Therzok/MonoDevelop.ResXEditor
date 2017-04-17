@@ -3,9 +3,16 @@
     public abstract class ResXEditorTableViewContent : ResXEditorViewContent
     {
         Xwt.Table table;
-        protected sealed override void OnInitialize(ResXData data)
+        protected sealed override void OnInitialize()
         {
             table = new Xwt.Table();
+        }
+
+        protected override void OnDataChanged (ResXData data)
+        {
+            base.OnDataChanged (data);
+
+            table.Clear ();
 
             int row = 0;
             int col = 0;
@@ -20,7 +27,7 @@
                 var image = GetImage(node);
                 if (image == null)
                     continue;
-                
+
                 table.Add(CreateItem(node.Name, image), col++, row);
                 if (col == 3) {
                     col = 0;

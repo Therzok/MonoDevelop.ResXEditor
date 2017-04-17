@@ -5,27 +5,27 @@ namespace MonoDevelop.ResXEditor
 {
     public abstract class ResXEditorBinding
     {
-        public abstract IEnumerable<Type> TypesHandled { get; }
-        public abstract ResXEditorViewContent CreateViewContent(ResXData data);
+        protected internal abstract IEnumerable<Type> TypesHandled { get; }
+        protected internal abstract ResXEditorViewContent CreateViewContent(List<ResXData> data, ResXData mainResx);
     }
 
     public abstract class ResXEditorBinding<T> : ResXEditorBinding where T:ResXEditorViewContent,new()
     {
-        public sealed override ResXEditorViewContent CreateViewContent(ResXData data) => new T().Initialize(data);
+        protected internal sealed override ResXEditorViewContent CreateViewContent(List<ResXData> data, ResXData mainResx) => new T().Initialize(data, mainResx);
     }
 
     class ResXStringDisplayBinding : ResXEditorBinding<ResXEditorStringsViewContent>
     {
-        public override IEnumerable<Type> TypesHandled => new[] { typeof(string) };
+        protected internal override IEnumerable<Type> TypesHandled => new[] { typeof(string) };
     }
 
     class ResXImageDisplayBinding : ResXEditorBinding<ResXEditorImageViewContent>
     {
-        public override IEnumerable<Type> TypesHandled => new[] { typeof(System.Drawing.Bitmap), typeof(System.Drawing.Icon) };
+        protected internal override IEnumerable<Type> TypesHandled => new[] { typeof(System.Drawing.Bitmap), typeof(System.Drawing.Icon) };
     }
 
     class ResXOtherDisplayBinding : ResXEditorBinding<ResXEditorOtherViewContent>
     {
-        public override IEnumerable<Type> TypesHandled => Array.Empty<Type>();
+        protected internal override IEnumerable<Type> TypesHandled => Array.Empty<Type>();
     }
 }

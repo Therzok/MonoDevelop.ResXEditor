@@ -10,13 +10,30 @@ namespace MonoDevelop.ResXEditor
         Xwt.ScrollView sw;
 
         readonly protected HashSet<string> names = new HashSet<string>();
-        protected ResXData Data { get; private set; }
+        protected IList<ResXData> Datas { get; private set; }
         protected DocumentToolbar Toolbar { get; private set; }
 
-        internal ResXEditorViewContent Initialize(ResXData data)
+        ResXData data;
+        protected ResXData Data {
+            get => data;
+            private set {
+                if (data != value) {
+                    data = value;
+                    OnDataChanged (value);
+                }
+            }
+        }
+
+        protected virtual void OnDataChanged(ResXData data)
         {
-            Data = data;
-            OnInitialize(data);
+            
+        }
+
+        internal ResXEditorViewContent Initialize(List<ResXData> resxData, ResXData mainResx)
+        {
+            Datas = resxData;
+            Data = mainResx;
+            OnInitialize ();
             return this;
         }
 
@@ -68,9 +85,14 @@ namespace MonoDevelop.ResXEditor
             // TODO: Handle source editor?
             // TODO: Add functionality.
             var languageCombo = new Xwt.ComboBox();
+            var itemName = Data.Path.Remove (Data.Path.LastIndexOf (".resx", Core.FilePath.PathComparison), ".resx".Length);
             foreach (var item in Constants.AllCultures)
             {
-                var pf = Project.Files.GetFile(System.IO.Path.ChangeExtension(Data.Path, item.Name + ".resx"));
+                string langName = string.Empty;
+                if (!string.IsNullOrEmpty (item.Name))
+                    langName = "." + item.Name;
+                
+                var pf = Project.Files.GetFile (itemName + langName + ".resx");
                 if (pf == null)
                     continue;
 
@@ -84,7 +106,7 @@ namespace MonoDevelop.ResXEditor
         {
         }
 
-        protected abstract void OnInitialize(ResXData data);
+        protected abstract void OnInitialize();
         protected abstract Xwt.Widget CreateContent();
 
         protected sealed override void OnWorkbenchWindowChanged()

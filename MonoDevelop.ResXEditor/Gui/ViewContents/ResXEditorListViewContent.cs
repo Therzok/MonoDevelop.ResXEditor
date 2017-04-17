@@ -16,7 +16,7 @@ namespace MonoDevelop.ResXEditor
         protected readonly Xwt.DataField<string> typeField = new Xwt.DataField<string>();
         protected readonly Xwt.DataField<ResXNode> nodeField = new Xwt.DataField<ResXNode>();
 
-        protected sealed override void OnInitialize(ResXData data)
+        protected sealed override void OnInitialize()
         {
             store = OnCreateListStore();
 
@@ -28,12 +28,13 @@ namespace MonoDevelop.ResXEditor
             listView.SelectionChanged += (sender, e) => {
                 if (oldRows != null)
                 {
-                    foreach (var row in oldRows)
-                    {
+                    foreach (var row in oldRows) {
                         if (row == store.RowCount - 1)
-                            store.SetValue(row, countField, "*");
+                            store.SetValue (row, countField, "*");
+                        else if (string.IsNullOrWhiteSpace (store.GetValue (row, nameField)) && !string.IsNullOrEmpty (store.GetValue (row, valueField)))
+                            store.SetValue (row, countField, "!");
                         else
-                            store.SetValue(row, countField, string.Empty);
+                            store.SetValue (row, countField, string.Empty);
                     }
                 }
 
@@ -45,6 +46,13 @@ namespace MonoDevelop.ResXEditor
             listView.Show();
 
             AddListViewColumns(listView.Columns);
+        }
+
+        protected override void OnDataChanged (ResXData data)
+        {
+            base.OnDataChanged (data);
+
+            store.Clear ();
 
             foreach (var node in data.Nodes)
             {
@@ -172,10 +180,10 @@ namespace MonoDevelop.ResXEditor
             var name = store.GetValue(row, nameField);
             if (name == string.Empty)
             {
-                if (store.GetValue(row, valueField) != string.Empty)
-                    store.SetValue(row, countField, "!");
+                if (store.GetValue (row, valueField) != string.Empty)
+                    store.SetValue (row, countField, "!");
                 else
-                    store.SetValue(row, countField, "*");
+                    store.SetValue (row, countField, "▶");
             }
             else
             {

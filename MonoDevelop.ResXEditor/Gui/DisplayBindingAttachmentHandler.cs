@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Linq;
 using Mono.Addins;
 using MonoDevelop.Components.Commands;
 using MonoDevelop.Ide;
@@ -35,16 +37,20 @@ namespace MonoDevelop.ResXEditor
                 return;
 
             // Load resx data.
-            ResXData resx;
-            if (document.HasProject)
-                resx = ResXData.FromFile(document.Project.Files.GetFile(document.FileName));
-            else
-                resx = ResXData.FromFile(document.FileName);
+            List<ResXData> resx;
+            if (document.HasProject) {
+                resx = ResXData.FromProjectFile (document.Project.Files.GetFile (document.FileName)).ToList ();
+            } else {
+                resx = new List<ResXData> {
+                    ResXData.FromFile (document.FileName)
+                };;
+            }
+            var mainResx = resx [0];
 
             int index = 0;
             foreach (var editor in AddinManager.GetExtensionObjects<ResXEditorBinding>(ResXEditorsExtensionPath))
             {
-                var viewContent = editor.CreateViewContent(resx);
+                var viewContent = editor.CreateViewContent(resx, mainResx);
                 document.Window.InsertViewContent(index++, viewContent);
 				viewContent.Project = document.Project;
 			}

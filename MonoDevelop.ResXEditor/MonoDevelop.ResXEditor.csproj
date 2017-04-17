@@ -43,6 +43,7 @@
     <Compile Include="Gui\ViewContents.Impl\ResXEditorImageViewContent.cs" />
     <Compile Include="Gui\ViewContents\ResXEditorTableViewContent.cs" />
     <Compile Include="Core\Constants.cs" />
+    <Compile Include="Gui\ResXEditorDisplayBinding.cs" />
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Properties\Manifest.addin.xml" />
