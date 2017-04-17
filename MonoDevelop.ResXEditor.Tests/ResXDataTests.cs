@@ -1,6 +1,7 @@
 ﻿using NUnit.Framework;
 using System;
 using System.IO;
+using System.Linq;
 using System.Resources;
 
 namespace MonoDevelop.ResXEditor.Tests
@@ -43,10 +44,10 @@ namespace MonoDevelop.ResXEditor.Tests
         public void TestLoadFromProjectFile()
         {
             var pf = new Projects.ProjectFile(resxFile);
-            var resxdata = ResXData.FromFile(pf);
+            var resxdata = ResXData.FromProjectFile(pf);
 
-            Assert.AreSame(pf, resxdata.ProjectFile);
-            CheckEquality(resxdata);
+            Assert.AreSame(pf, resxdata.First().ProjectFile);
+            CheckEquality(resxdata.First());
         }
 
 		[Test]
