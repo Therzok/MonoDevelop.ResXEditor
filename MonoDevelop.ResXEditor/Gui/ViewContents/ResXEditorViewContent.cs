@@ -69,17 +69,13 @@ namespace MonoDevelop.ResXEditor
             // TODO: Handle source editor?
             // TODO: Add functionality.
             var languageCombo = new Xwt.ComboBox();
-            languageCombo.Items.Add("", "Neutral");
-            if (Project != null)
+            foreach (var item in Constants.AllCultures)
             {
-                foreach (var item in Constants.AllCultures)
-                {
-                    var pf = Project.Files.GetFile(System.IO.Path.ChangeExtension(Data.Path, item.Name + ".resx"));
-                    if (pf == null)
-                        continue;
+                var pf = Project.Files.GetFile(System.IO.Path.ChangeExtension(Data.Path, item.Name + ".resx"));
+                if (pf == null)
+                    continue;
 
-                    languageCombo.Items.Add(item.Name, item.DisplayName);
-                }
+                languageCombo.Items.Add(item.Name, item.DisplayName);
             }
             languageCombo.SelectedIndex = 0;
             return languageCombo;
@@ -87,9 +83,10 @@ namespace MonoDevelop.ResXEditor
 
         protected virtual void OnToolbarSet()
         {
-            
+
         }
-		protected abstract void OnInitialize(ResXData data);
+
+        protected abstract void OnInitialize(ResXData data);
         protected abstract Xwt.Widget CreateContent();
 
         protected sealed override void OnWorkbenchWindowChanged()
@@ -101,12 +98,18 @@ namespace MonoDevelop.ResXEditor
                 Toolbar = WorkbenchWindow.GetToolbar(this);
                 OnToolbarSet();
 
-                //Toolbar.Insert(new XwtControl(CreateLanguageCombo()), 0);
                 Toolbar.Insert(new XwtControl(CreateAddButton()), 0);
                 Toolbar.Add(new XwtControl(new Xwt.VSeparator()));
                 if (Data.ProjectFile != null)
                     Toolbar.Add(new XwtControl(CreateGenerationCombo()));
             }
+        }
+
+        protected override void OnSetProject(Projects.Project project)
+        {
+            base.OnSetProject(project);
+
+            Toolbar.Insert(new XwtControl(CreateLanguageCombo()), 0);
         }
 
         public sealed override Xwt.Widget Widget => sw ?? (sw = new Xwt.ScrollView(CreateContent()) { Visible = true });

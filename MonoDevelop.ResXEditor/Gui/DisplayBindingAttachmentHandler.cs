@@ -46,7 +46,8 @@ namespace MonoDevelop.ResXEditor
             {
                 var viewContent = editor.CreateViewContent(resx);
                 document.Window.InsertViewContent(index++, viewContent);
-            }
+				viewContent.Project = document.Project;
+			}
         }
     }
 }
