@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 using MonoDevelop.Components;
 using MonoDevelop.Ide.Gui;
 
@@ -26,27 +27,33 @@ namespace MonoDevelop.ResXEditor
 
         protected virtual void OnDataChanged(ResXData data)
         {
-            
         }
 
         internal ResXEditorViewContent Initialize(List<ResXData> resxData, ResXData mainResx)
         {
+			OnInitialize();
             Datas = resxData;
             Data = mainResx;
-            OnInitialize ();
             return this;
         }
 
-        Xwt.MenuItem CreateMenuItem(string label, Type nodeType)
+        Xwt.MenuItem CreateMenuItem(string label, Type nodeType, Xwt.FileDialogFilter filter)
         {
             var mi = new Xwt.MenuItem(label);
             mi.Clicked += (sender, e) =>
             {
                 using (var dialog = new Xwt.OpenFileDialog())
                 {
+                    if (filter != null)
+                    {
+                        dialog.Filters.Add(filter);
+                        dialog.ActiveFilter = filter;
+                    }
+
                     if (!dialog.Run(sw.ParentWindow))
                         return;
                     Data.Nodes.Add(Data.CreateNode(dialog.FileName, nodeType));
+                    Data.WriteToFile(Data.Nodes);
                 }
             };
 
@@ -56,8 +63,8 @@ namespace MonoDevelop.ResXEditor
         Xwt.Button CreateAddButton()
         {
             var menu = new Xwt.Menu();
-            menu.Items.Add(CreateMenuItem("Image", typeof(System.Drawing.Bitmap)));
-            menu.Items.Add(CreateMenuItem("Icon", typeof(System.Drawing.Icon)));
+            menu.Items.Add(CreateMenuItem("Image", typeof(System.Drawing.Bitmap), null));
+            menu.Items.Add(CreateMenuItem("Icon", typeof(System.Drawing.Icon), new Xwt.FileDialogFilter("Icon files", "*.ico")));
 
             return new Xwt.MenuButton("Add Resource")
             {
@@ -96,9 +103,9 @@ namespace MonoDevelop.ResXEditor
                 if (pf == null)
                     continue;
 
-                languageCombo.Items.Add(item.Name, item.DisplayName);
+                languageCombo.Items.Add(pf, item.DisplayName);
             }
-            languageCombo.SelectedIndex = 0;
+            languageCombo.SelectedItem = Data.ProjectFile;
             return languageCombo;
         }
 
@@ -133,5 +140,11 @@ namespace MonoDevelop.ResXEditor
         }
 
         public sealed override Xwt.Widget Widget => sw ?? (sw = new Xwt.ScrollView(CreateContent()) { Visible = true });
-    }
+
+		public override Task Save()
+		{
+			data.WriteToFile(data.Nodes);
+			return base.Save();
+		}
+	}
 }

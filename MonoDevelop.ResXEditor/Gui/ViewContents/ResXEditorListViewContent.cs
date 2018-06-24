@@ -172,14 +172,14 @@ namespace MonoDevelop.ResXEditor
             //FileService.NotifyFileChanged(Data.Path);
         }
 
-        void TextChanged(object o, Xwt.WidgetEventArgs args)
+		void TextChanged(object o, Xwt.TextChangedEventArgs args)
         {
             var etc = (Xwt.TextCellView)o;
 
             var row = listView.CurrentEventRow;
             var name = store.GetValue(row, nameField);
             if (name == string.Empty)
-            {
+			{
                 if (store.GetValue (row, valueField) != string.Empty)
                     store.SetValue (row, countField, "!");
                 else
@@ -188,23 +188,21 @@ namespace MonoDevelop.ResXEditor
             else
             {
                 store.SetValue(row, countField, string.Empty);
-                AddPlaceholder();
             }
 
-            // FIXME: Need Xwt with NewText in args.
-            string newText = etc.Text; // args.NewText;
+			string newText = args.NewText;
             var node = store.GetValue(row, nodeField);
 
             args.Handled = UpdateNodeModel(node, etc, newText);
-            if (listView.CurrentEventRow == store.RowCount - 1)
-            {
-                if (name != string.Empty)
-                    AddPlaceholder();
-            }
-
-            // TODO: Maybe only do it on user save?
-            //listView.ColumnsAutosize();
-            //Data.WriteToFile();
+			if (!args.Handled)
+			{
+				if (listView.CurrentEventRow == store.RowCount - 1)
+				{
+					if (name != string.Empty)
+						AddPlaceholder();
+					Data.Nodes.Add(node);
+				}
+			}
         }
 
         bool UpdateNodeModel(ResXNode node, Xwt.TextCellView etc, string newText)
