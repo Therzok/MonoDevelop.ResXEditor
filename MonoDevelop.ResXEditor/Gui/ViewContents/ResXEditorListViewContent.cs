@@ -77,8 +77,14 @@ namespace MonoDevelop.ResXEditor
             listView.SelectionChanged += (sender, e) =>
             {
                 var rows = listView.SelectedRows.Length;
-                removeButton.Sensitive = rows > 0;
-                removeButton.Label = rows > 1 ? "Remove Resources" : "Remove Resource";
+
+				bool newSensitive = rows > 0;
+				if (removeButton.Sensitive != newSensitive)
+					removeButton.Sensitive = newSensitive;
+
+				string newLabel = rows > 1 ? "Remove Resources" : "Remove Resource";
+				if (removeButton.Label != newLabel)
+					removeButton.Label = newLabel;
             };
             return removeButton;
         }
