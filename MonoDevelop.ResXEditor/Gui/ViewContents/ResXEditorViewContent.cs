@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using MonoDevelop.Components;
+using MonoDevelop.Core;
 using MonoDevelop.Ide.Gui;
 
 namespace MonoDevelop.ResXEditor
@@ -32,6 +33,7 @@ namespace MonoDevelop.ResXEditor
         internal ResXEditorViewContent Initialize(List<ResXData> resxData, ResXData mainResx)
         {
 			OnInitialize();
+
             Datas = resxData;
             Data = mainResx;
             return this;
@@ -53,7 +55,8 @@ namespace MonoDevelop.ResXEditor
                     if (!dialog.Run(sw.ParentWindow))
                         return;
                     Data.Nodes.Add(Data.CreateNode(dialog.FileName, nodeType));
-                    Data.WriteToFile(Data.Nodes);
+					OnDataChanged(Data);
+					SetDocumentDirty();
                 }
             };
 
@@ -82,7 +85,10 @@ namespace MonoDevelop.ResXEditor
             int selectedIndex = generationCombo.Items.IndexOf(Data.ProjectFile.Generator);
             generationCombo.SelectedIndex = selectedIndex != -1 ? selectedIndex : 2;
 
-            generationCombo.SelectionChanged += (sender, e) => Data.ProjectFile.Generator = (string)generationCombo.SelectedItem;
+			generationCombo.SelectionChanged += (sender, e) =>
+			{
+				Data.ProjectFile.Generator = (string)generationCombo.SelectedItem;
+			};
             return generationCombo;
         }
 
@@ -129,22 +135,36 @@ namespace MonoDevelop.ResXEditor
                 Toolbar.Add(new XwtControl(new Xwt.VSeparator()));
                 if (Data.ProjectFile != null)
                     Toolbar.Add(new XwtControl(CreateGenerationCombo()));
+
+				var doc = WorkbenchWindow.Document;
+				doc.Saved += OnDocumentSaved;
             }
         }
 
-        protected override void OnSetProject(Projects.Project project)
+		void OnDocumentSaved(object sender, EventArgs args)
+		{
+			Data.WriteToFile(data.Nodes);
+			FileService.NotifyFileChanged(Data.Path);
+		}
+
+		public override void Dispose()
+		{
+			var doc = WorkbenchWindow?.Document;
+			if (doc != null)
+				doc.Saved -= OnDocumentSaved;
+			base.Dispose();
+		}
+
+		protected override void OnSetProject(Projects.Project project)
         {
             base.OnSetProject(project);
 
             Toolbar.Insert(new XwtControl(CreateLanguageCombo()), 0);
         }
 
-        public sealed override Xwt.Widget Widget => sw ?? (sw = new Xwt.ScrollView(CreateContent()) { Visible = true });
+		protected void SetDocumentDirty ()
+			=> WorkbenchWindow.ViewContent.IsDirty = true;
 
-		public override Task Save()
-		{
-			data.WriteToFile(data.Nodes);
-			return base.Save();
-		}
+		public sealed override Xwt.Widget Widget => sw ?? (sw = new Xwt.ScrollView(CreateContent()) { Visible = true });
 	}
 }

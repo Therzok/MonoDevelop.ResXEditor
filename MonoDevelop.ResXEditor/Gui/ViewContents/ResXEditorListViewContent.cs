@@ -144,17 +144,21 @@ namespace MonoDevelop.ResXEditor
 
         void OnButtonPress(object o, Xwt.ButtonEventArgs args)
         {
-            if (args.Button != Xwt.PointerButton.Right)
+            if (!args.IsContextMenuTrigger)
                 return;
 
             args.Handled = true;
 
-            var menu = new Xwt.Menu();
-            var mi = new Xwt.MenuItem("Remove Row");
-            menu.Items.Add(mi);
-            mi.Clicked += (sender, e) => RemoveSelectedRows();
+			var row = listView.GetRowAtPosition(args.Position);
+			if (row != -1)
+			{
+				var menu = new Xwt.Menu();
+				var mi = new Xwt.MenuItem("Remove Row");
+				menu.Items.Add(mi);
+				mi.Clicked += (sender, e) => RemoveSelectedRows();
 
-            menu.Popup(listView, args.X, args.Y);
+				menu.Popup(listView, args.X, args.Y);
+			}
         }
 
         void RemoveSelectedRows()
@@ -173,45 +177,54 @@ namespace MonoDevelop.ResXEditor
 
                 store.RemoveRow(row - removed++);
             }
-            // FIXME: Serialize
-            //Data.WriteToFile();
-            //FileService.NotifyFileChanged(Data.Path);
+			SetDocumentDirty();
         }
 
 		void TextChanged(object o, Xwt.TextChangedEventArgs args)
         {
             var etc = (Xwt.TextCellView)o;
 
-            var row = listView.CurrentEventRow;
-            var name = store.GetValue(row, nameField);
-            if (name == string.Empty)
-			{
-                if (store.GetValue (row, valueField) != string.Empty)
-                    store.SetValue (row, countField, "!");
-                else
-                    store.SetValue (row, countField, "▶");
-            }
-            else
-            {
-                store.SetValue(row, countField, string.Empty);
-            }
+            var row = listView.FocusedRow;
+			var node = store.GetValue(row, nodeField);
+
+			var oldName = node.Name;
+			UpdateCountField(row, oldName);
+
+			SetDocumentDirty();
 
 			string newText = args.NewText;
-            var node = store.GetValue(row, nodeField);
 
             args.Handled = UpdateNodeModel(node, etc, newText);
 			if (!args.Handled)
 			{
-				if (listView.CurrentEventRow == store.RowCount - 1)
+				if (row == store.RowCount - 1)
 				{
-					if (name != string.Empty)
+					if (string.IsNullOrWhiteSpace (oldName) && !string.IsNullOrWhiteSpace (node.Name))
+					{
+						Data.Nodes.Add(node);
 						AddPlaceholder();
-					Data.Nodes.Add(node);
+					}
 				}
 			}
         }
 
-        bool UpdateNodeModel(ResXNode node, Xwt.TextCellView etc, string newText)
+		void UpdateCountField (int row, string name)
+		{
+			if (name == string.Empty)
+			{
+				var oldValue = store.GetValue(row, valueField);
+				if (!string.IsNullOrWhiteSpace(oldValue))
+					store.SetValue(row, countField, "!");
+				else
+					store.SetValue(row, countField, "▶");
+			}
+			else
+			{
+				store.SetValue(row, countField, string.Empty);
+			}
+		}
+
+		bool UpdateNodeModel(ResXNode node, Xwt.TextCellView etc, string newText)
         {
             if (etc.TextField == nameField)
             {

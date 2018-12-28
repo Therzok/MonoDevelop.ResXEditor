@@ -44,19 +44,40 @@
             }
 
             var vbox = new Xwt.VBox();
+			RegisterFocusHandlers(vbox);
+
             vbox.PackStart(new Xwt.Label(title)
             {
                 HorizontalPlacement = Xwt.WidgetPlacement.Center,
                 TextAlignment = Xwt.Alignment.Center,
             });
-            vbox.PackStart(new Xwt.ImageView(image)
-            {
-                HorizontalPlacement = Xwt.WidgetPlacement.Center,
-            });
-            return vbox;
+
+			vbox.PackStart(new Xwt.ImageView(image)
+			{
+				HorizontalPlacement = Xwt.WidgetPlacement.Center,
+			});
+
+			return vbox;
         }
 
-        protected sealed override Xwt.Widget CreateContent() => table;
+		void RegisterFocusHandlers (Xwt.Widget widget)
+		{
+			widget.CanGetFocus = true;
+
+			widget.GotFocus += (sender, e) =>
+			{
+				var w = (Xwt.Widget)sender;
+				w.BackgroundColor = Ide.Gui.Styles.BaseSelectionBackgroundColor;
+			};
+
+			widget.LostFocus += (sender, e) =>
+			{
+				var w = (Xwt.Widget)sender;
+				w.BackgroundColor = Ide.Gui.Styles.BackgroundColor;
+			};
+		}
+
+		protected sealed override Xwt.Widget CreateContent() => table;
         protected abstract Xwt.Drawing.Image GetImage(ResXNode node);
         protected abstract bool SkipNode(ResXNode node);
     }

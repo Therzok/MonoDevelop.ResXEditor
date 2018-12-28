@@ -8,20 +8,12 @@
             if (bitmap == null)
                 return null;
 
-            var path = System.IO.Path.GetTempFileName();
-            try
+            using (var ms = new System.IO.MemoryStream ())
             {
-                using (var ms = new System.IO.MemoryStream ())
-                {
-                    bitmap.Save(ms, bitmap.RawFormat);
-                    ms.Position = 0;
-                    return Xwt.Drawing.Image.FromStream(ms);
-                }
-            }
-            finally
-            {
-                System.IO.File.Delete(path);
-            }
+            	bitmap.Save(ms, bitmap.RawFormat);
+			    ms.Position = 0;
+            	return Xwt.Drawing.Image.FromStream(ms);
+			}
         }
 
         protected override bool SkipNode(ResXNode node) =>
