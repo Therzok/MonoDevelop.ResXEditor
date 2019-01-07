@@ -3,58 +3,29 @@ using System.Collections.Generic;
 
 namespace MonoDevelop.ResXEditor
 {
-	public abstract class ResXEditorBinding
-	{
-		public abstract ResXEditorViewContent CreateViewContent(ResXData data);
+    public abstract class ResXEditorBinding
+    {
+        protected internal abstract IEnumerable<Type> TypesHandled { get; }
+        protected internal abstract ResXEditorViewContent CreateViewContent(List<ResXData> data, ResXData mainResx);
+    }
 
-		public abstract IEnumerable<Type> TypesHandled { get; }
-	}
+    public abstract class ResXEditorBinding<T> : ResXEditorBinding where T:ResXEditorViewContent,new()
+    {
+        protected internal sealed override ResXEditorViewContent CreateViewContent(List<ResXData> data, ResXData mainResx) => new T().Initialize(data, mainResx);
+    }
 
-	class ResXStringDisplayBinding : ResXEditorBinding
-	{
-		public override ResXEditorViewContent CreateViewContent(ResXData data)
-		{
-			return new ResXEditorStringsViewContent(data);
-		}
+    class ResXStringDisplayBinding : ResXEditorBinding<ResXEditorStringsViewContent>
+    {
+        protected internal override IEnumerable<Type> TypesHandled => new[] { typeof(string) };
+    }
 
-		public override IEnumerable<Type> TypesHandled
-		{
-			get
-			{
-				yield return typeof(string);
-			}
-		}
-	}
+    class ResXImageDisplayBinding : ResXEditorBinding<ResXEditorImageViewContent>
+    {
+        protected internal override IEnumerable<Type> TypesHandled => new[] { typeof(System.Drawing.Bitmap), typeof(System.Drawing.Icon) };
+    }
 
-	class ResXImageDisplayBinding : ResXEditorBinding
-	{
-		public override ResXEditorViewContent CreateViewContent(ResXData data)
-		{
-			return new ResXEditorImageViewContent(data);
-		}
-
-		public override IEnumerable<Type> TypesHandled
-		{
-			get
-			{
-				yield break;
-			}
-		}
-	}
-
-	class ResXOtherDisplayBinding : ResXEditorBinding
-	{
-		public override ResXEditorViewContent CreateViewContent(ResXData data)
-		{
-			return new ResXEditorOtherViewContent(data);
-		}
-
-		public override IEnumerable<Type> TypesHandled
-		{
-			get
-			{
-				yield break;
-			}
-		}
-	}
+    class ResXOtherDisplayBinding : ResXEditorBinding<ResXEditorOtherViewContent>
+    {
+        protected internal override IEnumerable<Type> TypesHandled => Array.Empty<Type>();
+    }
 }

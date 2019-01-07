@@ -1,11 +1,10 @@
-﻿using System;
-using Mono.Addins;
+﻿using Mono.Addins;
 using Mono.Addins.Description;
 
 [assembly: Addin(
-	"MonoDevelop.ResXEditor",
-	Namespace = "MonoDevelop.ResXEditor",
-	Version = "0.1"
+    "MonoDevelop.ResXEditor",
+    Namespace = "MonoDevelop.ResXEditor",
+    Version = "0.06201"
 )]
 
 [assembly: AddinName("MonoDevelop.ResXEditor")]
